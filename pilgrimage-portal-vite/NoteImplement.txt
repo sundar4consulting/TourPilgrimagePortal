@@ -1,0 +1,12 @@
+
+Ability for Admin to Add Expenses
+Ability to Admin to Edit and Delete Expenses
+Ability to Admin to Add Tour
+Ability to Admin for Edit and Delete Tour
+Ability to edit, Delete, Apporve the booking by Admin
+Ability to add Family Member in Tour Booking for Member( Remeber Booking should be for same tour)
+Ability for Admin to Add Booking
+
+Make adjustments to API and backend as applicable.
+
+9444683596 - Mouli

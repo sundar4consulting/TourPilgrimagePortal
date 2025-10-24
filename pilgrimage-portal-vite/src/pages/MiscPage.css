@@ -1,0 +1,472 @@
+/* Misc Page Styling */
+.miscPage {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+  padding-bottom: 2rem;
+}
+
+/* Page Header */
+.miscPage .pageHeader {
+  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.miscPage .pageTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s infinite;
+}
+
+.miscPage .pageSubtitle {
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCF7F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: rotateGradient 4s ease infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes rotateGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Custom Tabs */
+.miscPage .customTabs {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+  border-radius: 15px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
+  border: 2px solid #42A5F5;
+}
+
+.miscPage .customTabs .nav-link {
+  background: linear-gradient(135deg, #1976D2 0%, #42A5F5 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  margin: 0 0.25rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 800;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.miscPage .customTabs .nav-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+  background: linear-gradient(135deg, #42A5F5 0%, #64B5F6 100%);
+}
+
+.miscPage .customTabs .nav-link.active {
+  background: linear-gradient(135deg, #0D47A1 0%, #1565C0 100%);
+  box-shadow: 0 6px 20px rgba(13, 71, 161, 0.5);
+  transform: translateY(-3px);
+}
+
+.miscPage .tabTitle {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCF7F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: rotateGradient 4s ease infinite;
+}
+
+/* Filter Card */
+.miscPage .filterCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.miscPage .filterLabel {
+  font-weight: 600;
+  color: #1565C0;
+  margin-bottom: 0.5rem;
+}
+
+.miscPage .enhancedFormControl {
+  border: 2px solid #90CAF9;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.miscPage .enhancedFormControl:focus {
+  border-color: #1565C0;
+  box-shadow: 0 0 0 0.2rem rgba(21, 101, 192, 0.25);
+  outline: none;
+}
+
+.miscPage .createButton {
+  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.miscPage .createButton:hover {
+  background: linear-gradient(135deg, #43A047 0%, #66BB6A 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+}
+
+/* Table Card */
+.miscPage .tableCard {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: white;
+  overflow: hidden;
+}
+
+.miscPage .tableCard .card-header {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+  color: white;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  border: none;
+}
+
+/* Members Table */
+.miscPage .membersTable {
+  margin: 0;
+}
+
+.miscPage .membersTable thead {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+  color: white;
+}
+
+.miscPage .membersTable thead th {
+  border: none;
+  padding: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.miscPage .membersTable tbody tr {
+  transition: all 0.3s ease;
+}
+
+.miscPage .membersTable tbody tr:hover {
+  background-color: #E3F2FD;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.miscPage .membersTable tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.miscPage .membersTable .btn {
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.miscPage .membersTable .btn:hover {
+  transform: scale(1.1);
+}
+
+/* Pagination */
+.miscPage .paginationInfo {
+  color: #666;
+  font-weight: 500;
+}
+
+.miscPage .paginationControls {
+  display: flex;
+  align-items: center;
+}
+
+.miscPage .paginationControls .btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.miscPage .paginationControls .btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+}
+
+/* Statistics Cards */
+.miscPage .statsCard {
+  border: none;
+  border-radius: 15px;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.miscPage .statsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.miscPage .statsCard .card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.miscPage .statsCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.miscPage .statsCardPrimary {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+  color: white;
+}
+
+.miscPage .statsCardInfo {
+  background: linear-gradient(135deg, #0288D1 0%, #03A9F4 100%);
+  color: white;
+}
+
+.miscPage .statsCardDanger {
+  background: linear-gradient(135deg, #D32F2F 0%, #F44336 100%);
+  color: white;
+}
+
+.miscPage .statsCardSuccess {
+  background: linear-gradient(135deg, #388E3C 0%, #4CAF50 100%);
+  color: white;
+}
+
+.miscPage .statsIcon {
+  font-size: 3rem;
+  margin-right: 1.5rem;
+  opacity: 0.8;
+}
+
+.miscPage .statsContent {
+  flex: 1;
+}
+
+.miscPage .statsValue {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+}
+
+.miscPage .statsLabel {
+  font-size: 1rem;
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Statistics Table */
+.miscPage .statisticsTable thead {
+  background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+  color: white;
+}
+
+.miscPage .statisticsTable thead th {
+  border: none;
+  padding: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.miscPage .statisticsTable tbody tr:hover {
+  background-color: #E8F5E9;
+}
+
+.miscPage .statisticsTable tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.miscPage .sectionBadge {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+/* Modal */
+.miscPage .modalHeader {
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+  color: white;
+  border: none;
+  border-radius: 15px 15px 0 0;
+}
+
+.miscPage .modalHeader .btn-close {
+  filter: invert(1);
+}
+
+.miscPage .modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.miscPage .modal-body {
+  padding: 2rem;
+}
+
+.miscPage .modal-footer {
+  border-top: 2px solid #E3F2FD;
+  padding: 1rem 2rem;
+}
+
+.miscPage .saveButton {
+  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.miscPage .saveButton:hover {
+  background: linear-gradient(135deg, #43A047 0%, #66BB6A 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+}
+
+/* Badges */
+.miscPage .badge {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .miscPage .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .miscPage .pageSubtitle {
+    font-size: 0.95rem;
+  }
+
+  .miscPage .customTabs .nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .miscPage .statsCard .card-body {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .miscPage .statsIcon {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .miscPage .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .miscPage .membersTable thead th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .miscPage .membersTable tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .miscPage .paginationControls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Loading and Empty States */
+.miscPage .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.miscPage .text-muted {
+  color: #757575 !important;
+}
+
+/* Form Text */
+.miscPage .form-text {
+  font-size: 0.875rem;
+  color: #757575;
+}
+
+/* Alert Styling */
+.miscPage .alert {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+}
+
+.miscPage .alert-danger {
+  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  color: #C62828;
+}
+
+.miscPage .alert-success {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  color: #2E7D32;
+}

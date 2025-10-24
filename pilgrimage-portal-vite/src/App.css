@@ -1,0 +1,29 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  padding-top: 80px; /* Account for fixed navbar */
+}
+
+.navbar-brand {
+  color: #007bff !important;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.text-primary {
+  color: #007bff !important;
+}

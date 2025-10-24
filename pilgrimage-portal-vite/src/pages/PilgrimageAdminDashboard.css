@@ -1,0 +1,604 @@
+/* Pilgrimage Admin Dashboard - Custom Material Design Styles */
+
+.pilgrimage-admin-layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.pilgrimage-main-content {
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .pilgrimage-main-content {
+    margin-left: 280px;
+  }
+  
+  .pilgrimage-main-content.sidebar-minimized {
+    margin-left: 70px;
+  }
+}
+
+/* Loading Spinner */
+.pilgrimage-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.pilgrimage-spinner i {
+  font-size: 3rem;
+  color: #fff;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Top Navigation Bar */
+.pilgrimage-topbar {
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.pilgrimage-topbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.pilgrimage-sidebar-toggle {
+  color: #666;
+  font-size: 1.3rem;
+  border: none;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-right: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pilgrimage-sidebar-toggle:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pilgrimage-sidebar-toggle:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pilgrimage-sidebar-toggle i {
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.pilgrimage-sidebar-toggle:hover i {
+  transform: scale(1.1);
+}
+
+/* Add animated hamburger lines effect */
+.pilgrimage-sidebar-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.pilgrimage-sidebar-toggle:hover::before {
+  left: 100%;
+}
+
+.pilgrimage-mobile-toggle {
+  color: #666;
+  font-size: 1.3rem;
+  border: none;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-right: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pilgrimage-mobile-toggle:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.pilgrimage-page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 767px) {
+  .pilgrimage-page-title {
+    font-size: 1.4rem;
+    left: 60%;
+  }
+}
+
+.pilgrimage-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pilgrimage-notification-btn {
+  position: relative;
+  color: #666;
+  font-size: 1.1rem;
+  border: none;
+  background: none;
+}
+
+.pilgrimage-notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.7rem;
+}
+
+/* Dashboard Content */
+.pilgrimage-dashboard-content {
+  padding: 2rem 1.5rem;
+}
+
+/* Statistics Cards */
+.pilgrimage-stat-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.pilgrimage-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.pilgrimage-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.pilgrimage-card-revenue::before {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.pilgrimage-card-bookings::before {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.pilgrimage-card-tours::before {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.pilgrimage-card-approvals::before {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.pilgrimage-stat-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.pilgrimage-stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pilgrimage-card-revenue .pilgrimage-stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.pilgrimage-card-bookings .pilgrimage-stat-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.pilgrimage-card-tours .pilgrimage-stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.pilgrimage-card-approvals .pilgrimage-stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.pilgrimage-stat-details h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1;
+}
+
+.pilgrimage-stat-details p {
+  color: #666;
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.pilgrimage-stat-trend {
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pilgrimage-stat-trend.positive {
+  color: #28a745;
+}
+
+.pilgrimage-stat-trend.negative {
+  color: #dc3545;
+}
+
+.pilgrimage-stat-trend.neutral {
+  color: #6c757d;
+}
+
+/* Chart Cards */
+.pilgrimage-chart-card,
+.pilgrimage-donut-card,
+.pilgrimage-table-card,
+.pilgrimage-activity-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.pilgrimage-card-header {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pilgrimage-card-header h5 {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Chart Placeholder */
+.pilgrimage-chart-placeholder {
+  height: 300px;
+  padding: 1rem;
+}
+
+.pilgrimage-chart-bars {
+  display: flex;
+  align-items: end;
+  height: 250px;
+  gap: 8px;
+  padding-bottom: 1rem;
+}
+
+.pilgrimage-chart-bar {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px 4px 0 0;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+
+.pilgrimage-chart-bar:hover {
+  transform: scaleY(1.1);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.pilgrimage-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+/* Donut Chart */
+.pilgrimage-donut-chart {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #667eea 0deg 162deg,
+    #f093fb 162deg 270deg,
+    #4facfe 270deg 360deg
+  );
+  margin: 2rem auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pilgrimage-donut-chart::before {
+  content: '';
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+}
+
+.pilgrimage-donut-center {
+  z-index: 1;
+  text-align: center;
+}
+
+.pilgrimage-donut-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.pilgrimage-donut-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.pilgrimage-donut-legend {
+  padding: 0 1rem;
+}
+
+.pilgrimage-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.pilgrimage-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.pilgrimage-color-1 {
+  background: #667eea;
+}
+
+.pilgrimage-color-2 {
+  background: #f093fb;
+}
+
+.pilgrimage-color-3 {
+  background: #4facfe;
+}
+
+/* Table Styling */
+.pilgrimage-table {
+  margin: 0;
+}
+
+.pilgrimage-table thead th {
+  border: none;
+  color: #666;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem 0.75rem;
+  background: #f8f9fa;
+}
+
+.pilgrimage-table tbody td {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.pilgrimage-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Quick Actions */
+.pilgrimage-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pilgrimage-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.pilgrimage-action-btn:hover {
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.pilgrimage-btn-tours:hover {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.pilgrimage-btn-bookings:hover {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.pilgrimage-btn-expenses:hover {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.pilgrimage-btn-reports:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.pilgrimage-action-btn i {
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .pilgrimage-dashboard-content {
+    padding: 1rem;
+  }
+  
+  .pilgrimage-stat-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .pilgrimage-stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .pilgrimage-stat-details h3 {
+    font-size: 1.5rem;
+  }
+  
+  .pilgrimage-chart-placeholder {
+    height: 250px;
+  }
+  
+  .pilgrimage-chart-bars {
+    height: 200px;
+  }
+}
+
+/* Tour Carousel Styles */
+.pilgrimage-tour-carousel {
+  position: relative;
+  min-height: 200px;
+  padding: 1rem;
+}
+
+.pilgrimage-tour-slide {
+  position: relative;
+  animation: slideIn 0.5s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.pilgrimage-tour-details h4 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pilgrimage-tour-meta {
+  margin-top: 1rem;
+}
+
+.pilgrimage-tour-meta small {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.pilgrimage-carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pilgrimage-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pilgrimage-indicator.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: scale(1.2);
+}
+
+.pilgrimage-indicator:hover {
+  background: #bbb;
+}
+
+.pilgrimage-tour-placeholder {
+  border: 2px dashed #ddd;
+  color: #999;
+}
+
+/* Responsive Tour Carousel */
+@media (max-width: 768px) {
+  .pilgrimage-tour-carousel {
+    padding: 0.5rem;
+  }
+  
+  .pilgrimage-tour-details h4 {
+    font-size: 1.2rem;
+  }
+  
+  .pilgrimage-tour-meta .row > .col-sm-6 {
+    margin-bottom: 0.5rem;
+  }
+}

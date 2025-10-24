@@ -1,0 +1,47 @@
+{
+  "name": "pilgrimage-portal-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.5.0",
+    "bootstrap": "^5.3.1",
+    "formik": "^2.4.3",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.8.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "react-router-bootstrap": "^0.26.2",
+    "react-router-dom": "^6.15.0",
+    "react-toastify": "^8.2.0",
+    "yup": "^1.2.0"
+  },
+  "scripts": {
+    "start": "NODE_OPTIONS=\"--openssl-legacy-provider\" react-scripts start",
+    "build": "NODE_OPTIONS=\"--openssl-legacy-provider\" react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "react-scripts": "^4.0.3"
+  }
+}
