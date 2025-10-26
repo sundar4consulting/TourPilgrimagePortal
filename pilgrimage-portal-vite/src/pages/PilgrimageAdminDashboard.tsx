@@ -725,7 +725,8 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 setShowTourModal(true);
               }}
             >
-              <i className="fas fa-plus me-2"></i>Add New Tour
+              <i className="fas fa-plus me-2"></i>
+              <span className="stylish-yellow-gradient">Add New Tour</span>
             </Button>
           </Card.Header>
           <Card.Body>
@@ -1126,14 +1127,18 @@ const PilgrimageAdminDashboard: React.FC = () => {
       {/* Tour Modal */}
       <Modal show={showTourModal} onHide={() => setShowTourModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{editingTour ? 'Edit Tour' : 'Add New Tour'}</Modal.Title>
+          <Modal.Title>
+            <span className="stylish-modal-title">
+              {editingTour ? 'Edit Tour' : 'Add New Tour'}
+            </span>
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tour Title</Form.Label>
+                  <Form.Label className="stylish-form-label">Tour Title</Form.Label>
                   <Form.Control
                     type="text"
                     value={tourForm.title || ''}
@@ -1144,7 +1149,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Category</Form.Label>
+                  <Form.Label className="stylish-form-label">Category</Form.Label>
                   <Form.Select
                     value={tourForm.category || ''}
                     onChange={(e) => setTourForm({...tourForm, category: e.target.value})}
@@ -1160,7 +1165,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Days</Form.Label>
+                  <Form.Label className="stylish-form-label">Days</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.duration?.days || 0}
@@ -1173,7 +1178,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Nights</Form.Label>
+                  <Form.Label className="stylish-form-label">Nights</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.duration?.nights || 0}
@@ -1186,7 +1191,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Max Participants</Form.Label>
+                  <Form.Label className="stylish-form-label">Max Participants</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.maxParticipants || 0}
@@ -1198,7 +1203,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Adult Price</Form.Label>
+                  <Form.Label className="stylish-form-label">Adult Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.adult || 0}
@@ -1211,7 +1216,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Child Price</Form.Label>
+                  <Form.Label className="stylish-form-label">Child Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.child || 0}
@@ -1224,7 +1229,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Senior Price</Form.Label>
+                  <Form.Label className="stylish-form-label">Senior Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.senior || 0}
@@ -1239,7 +1244,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Start Date</Form.Label>
+                  <Form.Label className="stylish-form-label">Start Date</Form.Label>
                   <Form.Control
                     type="date"
                     value={tourForm.startDate || ''}
@@ -1249,7 +1254,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>End Date</Form.Label>
+                  <Form.Label className="stylish-form-label">End Date</Form.Label>
                   <Form.Control
                     type="date"
                     value={tourForm.endDate || ''}
@@ -1259,7 +1264,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
             </Row>
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
+              <Form.Label className="stylish-form-label">Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -1269,7 +1274,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Short Description</Form.Label>
+              <Form.Label className="stylish-form-label">Short Description</Form.Label>
               <Form.Control
                 type="text"
                 value={tourForm.shortDescription || ''}
@@ -1277,10 +1282,122 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 placeholder="Enter short description"
               />
             </Form.Group>
+            
+            {/* Destinations Section */}
+            <Form.Group className="mb-3">
+              <Form.Label className="stylish-form-label">Destinations <span className="text-danger">*</span></Form.Label>
+              <div className="border rounded p-3 bg-light">
+                {tourForm.destinations && tourForm.destinations.length > 0 ? (
+                  <div className="mb-3">
+                    {tourForm.destinations.map((dest: any, index: number) => (
+                      <div key={index} className="d-flex align-items-center mb-2 bg-white p-2 rounded border">
+                        <div className="flex-grow-1">
+                          <strong>{dest.name}</strong>, {dest.city}, {dest.state}
+                          {dest.description && <small className="text-muted d-block">{dest.description}</small>}
+                        </div>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            const newDests = tourForm.destinations.filter((_: any, i: number) => i !== index);
+                            setTourForm({...tourForm, destinations: newDests});
+                          }}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Alert variant="warning" className="mb-3">
+                    <i className="fas fa-exclamation-triangle me-2"></i>
+                    No destinations added yet. Add at least one destination.
+                  </Alert>
+                )}
+                
+                <div className="border-top pt-3">
+                  <h6 className="mb-3"><i className="fas fa-plus-circle me-2"></i>Add New Destination</h6>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-2">
+                        <Form.Label className="stylish-form-label">Place Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          id="destName"
+                          placeholder="e.g., Tirupati Temple"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-2">
+                        <Form.Label className="stylish-form-label">City</Form.Label>
+                        <Form.Control
+                          type="text"
+                          id="destCity"
+                          placeholder="e.g., Tirupati"
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={3}>
+                      <Form.Group className="mb-2">
+                        <Form.Label className="stylish-form-label">State</Form.Label>
+                        <Form.Control
+                          type="text"
+                          id="destState"
+                          placeholder="e.g., Andhra Pradesh"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col md={12}>
+                      <Form.Group className="mb-2">
+                        <Form.Label className="stylish-form-label">Description (Optional)</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          id="destDescription"
+                          placeholder="Brief description of the destination"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => {
+                      const name = (document.getElementById('destName') as HTMLInputElement)?.value;
+                      const city = (document.getElementById('destCity') as HTMLInputElement)?.value;
+                      const state = (document.getElementById('destState') as HTMLInputElement)?.value;
+                      const description = (document.getElementById('destDescription') as HTMLTextAreaElement)?.value;
+                      
+                      if (name && city && state) {
+                        const newDest = { name, city, state, description };
+                        setTourForm({
+                          ...tourForm,
+                          destinations: [...(tourForm.destinations || []), newDest]
+                        });
+                        
+                        // Clear inputs
+                        (document.getElementById('destName') as HTMLInputElement).value = '';
+                        (document.getElementById('destCity') as HTMLInputElement).value = '';
+                        (document.getElementById('destState') as HTMLInputElement).value = '';
+                        (document.getElementById('destDescription') as HTMLTextAreaElement).value = '';
+                      } else {
+                        alert('Please fill in Place Name, City, and State');
+                      }
+                    }}
+                  >
+                    <i className="fas fa-plus me-2"></i>Add Destination
+                  </Button>
+                </div>
+              </div>
+            </Form.Group>
+            
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
+                  <Form.Label className="stylish-form-label">Status</Form.Label>
                   <Form.Select
                     value={tourForm.status || 'draft'}
                     onChange={(e) => setTourForm({...tourForm, status: e.target.value})}
@@ -1293,7 +1410,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Difficulty</Form.Label>
+                  <Form.Label className="stylish-form-label">Difficulty</Form.Label>
                   <Form.Select
                     value={tourForm.difficulty || 'easy'}
                     onChange={(e) => setTourForm({...tourForm, difficulty: e.target.value})}

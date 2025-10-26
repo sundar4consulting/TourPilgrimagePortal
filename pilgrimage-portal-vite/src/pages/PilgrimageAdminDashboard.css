@@ -602,3 +602,59 @@
     margin-bottom: 0.5rem;
   }
 }
+
+/* Stylish Gradient Text for Add Tour */
+.stylish-add-tour-text {
+  background: linear-gradient(135deg, #0d5e3a 0%, #1a7f4f 50%, #28a745 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.stylish-modal-title {
+  background: linear-gradient(135deg, #0d5e3a 0%, #1a7f4f 50%, #28a745 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.8px;
+}
+
+/* Stylish Form Labels */
+.stylish-form-label {
+  background: linear-gradient(135deg, #0d5e3a 0%, #1a7f4f 50%, #28a745 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+/* Stylish Gradient Yellow Text */
+.stylish-yellow-gradient {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFC300 50%, #FFB300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  animation: shimmer 3s ease-in-out infinite;
+}
