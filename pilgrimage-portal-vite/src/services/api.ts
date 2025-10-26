@@ -9,7 +9,7 @@ import axios from 'axios'
     : "/api"; // let proxy handle i
   */
 
-const API_BASE_URL = 'https://tourpilgrimageportal.onrender.com'
+const API_BASE_URL = 'https://tourpilgrimageportal.onrender.com/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
