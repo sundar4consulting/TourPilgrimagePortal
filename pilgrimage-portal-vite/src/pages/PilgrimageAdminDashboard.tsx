@@ -1318,7 +1318,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 <div className="border-top pt-3">
                   <h6 className="mb-3"><i className="fas fa-plus-circle me-2"></i>Add New Destination</h6>
                   <Row>
-                    <Col md={6}>
+                    <Col md={4}>
                       <Form.Group className="mb-2">
                         <Form.Label className="stylish-form-label">Place Name</Form.Label>
                         <Form.Control
@@ -1348,6 +1348,20 @@ const PilgrimageAdminDashboard: React.FC = () => {
                         />
                       </Form.Group>
                     </Col>
+                    <Col md={2}>
+                      <Form.Group className="mb-2">
+                        <Form.Label className="stylish-form-label">Region</Form.Label>
+                        <Form.Select id="destRegion" defaultValue="">
+                          <option value="" disabled>Select Region</option>
+                          <option value="north-india">North India</option>
+                          <option value="south-india">South India</option>
+                          <option value="east-india">East India</option>
+                          <option value="west-india">West India</option>
+                          <option value="central-india">Central India</option>
+                          <option value="northeast-india">Northeast India</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
                   </Row>
                   <Row>
                     <Col md={12}>
@@ -1369,22 +1383,22 @@ const PilgrimageAdminDashboard: React.FC = () => {
                       const name = (document.getElementById('destName') as HTMLInputElement)?.value;
                       const city = (document.getElementById('destCity') as HTMLInputElement)?.value;
                       const state = (document.getElementById('destState') as HTMLInputElement)?.value;
+                      const region = (document.getElementById('destRegion') as HTMLSelectElement)?.value;
                       const description = (document.getElementById('destDescription') as HTMLTextAreaElement)?.value;
-                      
-                      if (name && city && state) {
-                        const newDest = { name, city, state, description };
+                      if (name && city && state && region) {
+                        const newDest = { name, city, state, region, description };
                         setTourForm({
                           ...tourForm,
                           destinations: [...(tourForm.destinations || []), newDest]
                         });
-                        
                         // Clear inputs
                         (document.getElementById('destName') as HTMLInputElement).value = '';
                         (document.getElementById('destCity') as HTMLInputElement).value = '';
                         (document.getElementById('destState') as HTMLInputElement).value = '';
+                        (document.getElementById('destRegion') as HTMLSelectElement).value = '';
                         (document.getElementById('destDescription') as HTMLTextAreaElement).value = '';
                       } else {
-                        alert('Please fill in Place Name, City, and State');
+                        alert('Please fill in Place Name, City, State, and Region');
                       }
                     }}
                   >
@@ -1399,11 +1413,12 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 <Form.Group className="mb-3">
                   <Form.Label className="stylish-form-label">Status</Form.Label>
                   <Form.Select
-                    value={tourForm.status || 'draft'}
+                    value={tourForm.status || 'active'}
                     onChange={(e) => setTourForm({...tourForm, status: e.target.value})}
                   >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
                   </Form.Select>
                 </Form.Group>
