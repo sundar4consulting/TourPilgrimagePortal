@@ -35,10 +35,10 @@ const PilgrimageAdminDashboard: React.FC = () => {
 
   // Modal states
   const [showTourModal, setShowTourModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  //const [showBookingModal, setShowBookingModal] = useState(false);
   const [showFamilyMemberModal, setShowFamilyMemberModal] = useState(false);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  //const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const [selectedBookingForFamily, setSelectedBookingForFamily] = useState<any>(null);
   const [showAddBookingModal, setShowAddBookingModal] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
