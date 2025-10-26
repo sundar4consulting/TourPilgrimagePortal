@@ -12,8 +12,8 @@ const ExpensesPage: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   
   // Pagination (for future use)
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  //const [currentPage, setCurrentPage] = useState(1);
+  //const [totalPages, setTotalPages] = useState(1);
   
   // Filters
   const [filters, setFilters] = useState({
