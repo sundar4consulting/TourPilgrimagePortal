@@ -1,33 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../services/AuthContext'
-import { expensesAPI, toursAPI, type Expense, type Tour } from '../services/api'
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Modal,
-  Form,
-  Table,
-  Alert,
-  Badge,
-  InputGroup,
-  Tabs,
-  Tab,
-  Dropdown
-} from 'react-bootstrap'
-import './ExpensesPage.css'
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Button, Table, Modal, Form, Alert, Badge, Tabs, Tab } from 'react-bootstrap';
+import { expensesAPI, toursAPI, Expense, Tour } from '../services/api';
+import './ExpensesPage.css';
 
 const ExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showExpenseModal, setShowExpenseModal] = useState(false)
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [currentExpense, setCurrentExpense] = useState<Expense | null>(null)
+  
+  // Active tab
   const [activeTab, setActiveTab] = useState('list')
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [expensesCount, setExpensesCount] = useState(0)
 
   // Filters
   const [filters, setFilters] = useState({
@@ -35,14 +29,10 @@ const ExpensesPage: React.FC = () => {
     tourId: '',
     paymentMethod: '',
     isApproved: undefined as boolean | undefined,
-    dateFrom: '',
-    dateTo: '',
-    minAmount: '',
-    maxAmount: ''
+    search: '',
+    sortBy: 'expenseDate',
+    sortOrder: 'desc' as 'asc' | 'desc'
   })
-
-  const { user, isAuthenticated } = useAuth()
-  const navigate = useNavigate()
 
   const [expenseForm, setExpenseForm] = useState({
     description: '',
@@ -64,6 +54,15 @@ const ExpensesPage: React.FC = () => {
     }
   })
 
+  // Statistics state
+  const [statistics, setStatistics] = useState({
+    totalAmount: 0,
+    approvedAmount: 0,
+    pendingAmount: 0,
+    totalCount: 0,
+    categoryStats: [] as Array<{ category: string; icon: string; count: number; amount: number }>
+  })
+
   const expenseCategories = [
     { value: 'accommodation', label: 'Accommodation', icon: '🏨' },
     { value: 'transportation', label: 'Transportation', icon: '🚌' },
@@ -82,12 +81,8 @@ const ExpensesPage: React.FC = () => {
   ]
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') {
-      navigate('/login')
-      return
-    }
     fetchData()
-  }, [isAuthenticated, user, navigate, filters])
+  }, [filters])
 
   const fetchData = async () => {
     try {
@@ -117,20 +112,12 @@ const ExpensesPage: React.FC = () => {
         if (filters.isApproved !== undefined) {
           filteredExpenses = filteredExpenses.filter(e => e.isApproved === filters.isApproved)
         }
-        if (filters.minAmount) {
-          filteredExpenses = filteredExpenses.filter(e => e.amount >= parseFloat(filters.minAmount))
-        }
-        if (filters.maxAmount) {
-          filteredExpenses = filteredExpenses.filter(e => e.amount <= parseFloat(filters.maxAmount))
-        }
-        if (filters.dateFrom) {
+        if (filters.search) {
+          const searchLower = filters.search.toLowerCase()
           filteredExpenses = filteredExpenses.filter(e => 
-            e.expenseDate && new Date(e.expenseDate) >= new Date(filters.dateFrom)
-          )
-        }
-        if (filters.dateTo) {
-          filteredExpenses = filteredExpenses.filter(e => 
-            e.expenseDate && new Date(e.expenseDate) <= new Date(filters.dateTo)
+            e.description?.toLowerCase().includes(searchLower) ||
+            e.receiptNumber?.toLowerCase().includes(searchLower) ||
+            e.notes?.toLowerCase().includes(searchLower)
           )
         }
 
@@ -156,18 +143,16 @@ const ExpensesPage: React.FC = () => {
     try {
       const expenseData = {
         ...expenseForm,
-        tour: expenseForm.tourId || undefined,
-        isApproved: false, // New expenses start as pending
-        addedBy: user?.id
+        tour: expenseForm.tourId || undefined
       }
       
-      if (editingExpense) {
-        await expensesAPI.update(editingExpense._id, expenseData)
+      if (currentExpense) {
+        await expensesAPI.update(currentExpense._id, expenseData)
       } else {
         await expensesAPI.create(expenseData as any)
       }
       
-      setShowExpenseModal(false)
+      setShowModal(false)
       resetExpenseForm()
       await fetchData()
     } catch (error) {
@@ -190,11 +175,7 @@ const ExpensesPage: React.FC = () => {
 
   const handleApproveExpense = async (expenseId: string, isApproved: boolean) => {
     try {
-      await expensesAPI.update(expenseId, { 
-        isApproved, 
-        approvedBy: isApproved ? user?.id : undefined,
-        approvedAt: isApproved ? new Date().toISOString() : undefined
-      })
+      await expensesAPI.adminApprove(expenseId, isApproved)
       await fetchData()
     } catch (error) {
       console.error('Error updating expense approval:', error)
@@ -203,7 +184,7 @@ const ExpensesPage: React.FC = () => {
   }
 
   const handleEditExpense = (expense: Expense) => {
-    setEditingExpense(expense)
+    setCurrentExpense(expense)
     setExpenseForm({
       description: expense.description,
       amount: expense.amount,
@@ -223,7 +204,7 @@ const ExpensesPage: React.FC = () => {
         address: expense.location?.address || ''
       }
     })
-    setShowExpenseModal(true)
+    setShowModal(true)
   }
 
   const resetExpenseForm = () => {
@@ -246,7 +227,7 @@ const ExpensesPage: React.FC = () => {
         address: ''
       }
     })
-    setEditingExpense(null)
+    setCurrentExpense(null)
   }
 
   const getCategoryInfo = (category: string) => {
@@ -279,24 +260,15 @@ const ExpensesPage: React.FC = () => {
     )
   }
 
-  const getApprovalBadge = (isApproved: boolean) => {
-    return (
-      <Badge bg={isApproved ? 'success' : 'warning'}>
-        {isApproved ? '✅ Approved' : '⏳ Pending'}
-      </Badge>
-    )
-  }
-
   const clearFilters = () => {
     setFilters({
       category: '',
       tourId: '',
       paymentMethod: '',
       isApproved: undefined,
-      dateFrom: '',
-      dateTo: '',
-      minAmount: '',
-      maxAmount: ''
+      search: '',
+      sortBy: 'expenseDate',
+      sortOrder: 'desc'
     })
   }
 
@@ -327,6 +299,7 @@ const ExpensesPage: React.FC = () => {
         <div className="pageHeader">
           <Row className="align-items-center">
             <Col>
+              <h1 className="pageTitle">💰 Expense Management</h1>
               <p className="pageSubtitle">Track and manage tour expenses across all categories</p>
             </Col>
             <Col xs="auto">
@@ -334,7 +307,7 @@ const ExpensesPage: React.FC = () => {
                 className="addButton"
                 onClick={() => {
                   resetExpenseForm()
-                  setShowExpenseModal(true)
+                  setShowModal(true)
                 }}
               >
                 <i className="fas fa-plus me-2"></i>
@@ -426,50 +399,44 @@ const ExpensesPage: React.FC = () => {
                 </Col>
               </Row>
               <Row className="mt-3">
-                <Col md={3}>
+                <Col md={4}>
                   <Form.Group>
-                    <Form.Label className="enhancedFormLabel">Date From</Form.Label>
+                    <Form.Label className="enhancedFormLabel">Search</Form.Label>
                     <Form.Control 
                       className="enhancedFormControl"
-                      type="date" 
-                      value={filters.dateFrom}
-                      onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                      type="text" 
+                      placeholder="Search description, receipt..."
+                      value={filters.search}
+                      onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                     />
                   </Form.Group>
                 </Col>
-                <Col md={3}>
+                <Col md={4}>
                   <Form.Group>
-                    <Form.Label className="enhancedFormLabel">Date To</Form.Label>
-                    <Form.Control 
+                    <Form.Label className="enhancedFormLabel">Sort By</Form.Label>
+                    <Form.Select 
                       className="enhancedFormControl"
-                      type="date" 
-                      value={filters.dateTo}
-                      onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group>
-                    <Form.Label className="enhancedFormLabel">Min Amount</Form.Label>
-                    <Form.Control 
-                      className="enhancedFormControl"
-                      type="number" 
-                      value={filters.minAmount}
-                      onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
-                      placeholder="₹0"
-                    />
+                      value={filters.sortBy}
+                      onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                    >
+                      <option value="expenseDate">Date</option>
+                      <option value="amount">Amount</option>
+                      <option value="description">Description</option>
+                      <option value="category">Category</option>
+                    </Form.Select>
                   </Form.Group>
                 </Col>
                 <Col md={2}>
                   <Form.Group>
-                    <Form.Label className="enhancedFormLabel">Max Amount</Form.Label>
-                    <Form.Control 
+                    <Form.Label className="enhancedFormLabel">Order</Form.Label>
+                    <Form.Select 
                       className="enhancedFormControl"
-                      type="number" 
-                      value={filters.maxAmount}
-                      onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
-                      placeholder="₹∞"
-                    />
+                      value={filters.sortOrder}
+                      onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
+                    >
+                      <option value="asc">↑ Asc</option>
+                      <option value="desc">↓ Desc</option>
+                    </Form.Select>
                   </Form.Group>
                 </Col>
                 <Col md={2} className="d-flex align-items-end">
@@ -582,41 +549,31 @@ const ExpensesPage: React.FC = () => {
                             </small>
                           </td>
                           <td>{getPaymentMethodBadge(expense.paymentMethod)}</td>
-                          <td>{getApprovalBadge(expense.isApproved)}</td>
                           <td>
-                            <Dropdown>
-                              <Dropdown.Toggle size="sm" variant="outline-primary">
-                                Actions
-                              </Dropdown.Toggle>
-                              <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => handleEditExpense(expense)}>
-                                  ✏️ Edit
-                                </Dropdown.Item>
-                                {!expense.isApproved && (
-                                  <Dropdown.Item 
-                                    onClick={() => handleApproveExpense(expense._id, true)}
-                                    className="text-success"
-                                  >
-                                    ✅ Approve
-                                  </Dropdown.Item>
-                                )}
-                                {expense.isApproved && (
-                                  <Dropdown.Item 
-                                    onClick={() => handleApproveExpense(expense._id, false)}
-                                    className="text-warning"
-                                  >
-                                    ⏳ Mark Pending
-                                  </Dropdown.Item>
-                                )}
-                                <Dropdown.Divider />
-                                <Dropdown.Item 
-                                  onClick={() => handleDeleteExpense(expense._id)}
-                                  className="text-danger"
-                                >
-                                  🗑️ Delete
-                                </Dropdown.Item>
-                              </Dropdown.Menu>
-                            </Dropdown>
+                            <Badge 
+                              bg={expense.isApproved ? 'success' : 'warning'}
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => handleApproveExpense(expense._id, !expense.isApproved)}
+                            >
+                              {expense.isApproved ? '✅ Approved' : '⏳ Pending'}
+                            </Badge>
+                          </td>
+                          <td>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => handleEditExpense(expense)}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteExpense(expense._id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -683,16 +640,16 @@ const ExpensesPage: React.FC = () => {
         </Tabs>
 
         {/* Add/Edit Expense Modal */}
-        <Modal show={showExpenseModal} onHide={() => setShowExpenseModal(false)} size="xl" className="expensesPage">
+        <Modal show={showModal} onHide={() => setShowModal(false)} size="xl">
           <Modal.Header closeButton>
             <Modal.Title>
-              {editingExpense ? '✏️ Edit Expense' : '➕ Add New Expense'}
+              {currentExpense ? '✏️ Edit Expense' : '➕ Add New Expense'}
             </Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSaveExpense}>
             <Modal.Body>
               <Tabs defaultActiveKey="basic" className="mb-3">
-                <Tab eventKey="basic" title="📋 Basic Info">
+                <Tab eventKey="basic" title="Basic Info">
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
@@ -727,19 +684,16 @@ const ExpensesPage: React.FC = () => {
                   <Row>
                     <Col md={4}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Amount (₹) *</Form.Label>
-                        <InputGroup>
-                          <InputGroup.Text>₹</InputGroup.Text>
-                          <Form.Control 
-                            type="number" 
-                            required
-                            min="0"
-                            step="0.01"
-                            value={expenseForm.amount}
-                            onChange={(e) => setExpenseForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-                            placeholder="0.00"
-                          />
-                        </InputGroup>
+                        <Form.Label>Amount (₹) <span className="text-danger">*</span></Form.Label>
+                        <Form.Control 
+                          type="number" 
+                          required
+                          min="0"
+                          step="0.01"
+                          value={expenseForm.amount}
+                          onChange={(e) => setExpenseForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                          placeholder="0.00"
+                        />
                       </Form.Group>
                     </Col>
                     <Col md={4}>
@@ -811,7 +765,7 @@ const ExpensesPage: React.FC = () => {
                   </Form.Group>
                 </Tab>
 
-                <Tab eventKey="vendor" title="📍 Vendor & Location">
+                <Tab eventKey="vendor" title="Vendor & Location">
                   <h6>👤 Vendor Information</h6>
                   <Row>
                     <Col md={4}>
@@ -893,11 +847,11 @@ const ExpensesPage: React.FC = () => {
               </Tabs>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowExpenseModal(false)}>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit">
-                {editingExpense ? '💾 Update Expense' : '💾 Save Expense'}
+              <Button variant="success" type="submit">
+                {currentExpense ? 'Update Expense' : 'Save Expense'}
               </Button>
             </Modal.Footer>
           </Form>

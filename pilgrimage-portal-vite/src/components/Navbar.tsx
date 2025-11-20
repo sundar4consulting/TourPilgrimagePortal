@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
             </div>
             <div>
               <div className="fw-bold text-primary" style={{ fontSize: '1.3rem', lineHeight: '1.2' }}>
-                Sri Vishnu Chitta Yatra
+                Sri Vishnu Chitra Yatra
               </div>
               <small className="text-muted" style={{ fontSize: '0.75rem' }}>
                 Spiritual Journeys

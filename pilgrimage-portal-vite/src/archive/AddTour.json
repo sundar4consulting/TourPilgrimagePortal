@@ -1,0 +1,78 @@
+{
+    "title": "North India - Punya Nadhi & Gaya",
+    "description": "This spiritual pilgrimage, organized by Sri VishnuChitta Yatra, is a sacred journey through some of the most revered sites in Northern India. The tour includes Gaya, Ayodhya, Naimisaranyam, Prayagraj (Allahabad), and Chitrakoot, offering participants the opportunity to perform ancestral rites (Tarpanam and Shraddham), take part in holy river baths (Snanam), and visit divine temples and heritage sites. The journey spans 11 days, from October 28 to November 7, 2025, starting from Chennai and includes both train and bus travel.\n",
+    "shortDescription": "An 11-day sacred pilgrimage from Chennai to Gaya, Ayodhya, and other holy sites, organized by Sri VishnuChitta Yatra, featuring rituals, temple visits, and spiritual experiences.",
+    "duration": {
+        "days": 11,
+        "nights": 10
+    },
+    "pricing": {
+        "adult": 75000,
+        "child": 40000,
+        "senior": 60000,
+        "currency": "INR"
+    },
+    "category": "pilgrimage",
+    "difficulty": "easy",
+    "featured": false,
+    "destinations": [
+        {
+            "name": "Vishnupad Temple",
+            "city": "Gaya",
+            "state": "Bihar",
+            "description": "A sacred temple dedicated to Lord Vishnu, believed to be the site where Lord Vishnu's footprint is imprinted on a rock."
+        },
+        {
+            "name": "Phalgu River (Tarpanam)",
+            "city": "Gaya",
+            "state": "Bihar",
+            "description": "A holy river where rituals for ancestors (Tarpanam) are performed, especially during Pitru Paksha."
+        },
+        {
+            "name": "Ram Janma Bhoomi",
+            "city": "Ayodhya",
+            "state": "Uttar Pradesh",
+            "description": "The birthplace of Lord Rama, a major pilgrimage site for Hindus."
+        },
+        {
+            "name": "Sarayu River (Snanam)",
+            "city": "Ayodhya",
+            "state": "Uttar Pradesh",
+            "description": "A sacred river where devotees take holy dips, believed to cleanse sins."
+        },
+        {
+            "name": "Kanak Bhawan",
+            "city": "Ayodhya",
+            "state": "Uttar Pradesh",
+            "description": "A temple dedicated to Lord Rama and Sita, known for its golden idols and architecture."
+        },
+        {
+            "name": "Chakratirtha",
+            "city": "Naimisaranyam",
+            "state": "Uttar Pradesh",
+            "description": "A revered site where Lord Vishnu's chakra is believed to have fallen; ideal for holy baths."
+        },
+        {
+            "name": "Ahobila Mutt",
+            "city": "Naimisaranyam",
+            "state": "Uttar Pradesh",
+            "description": "A traditional Vaishnavite monastery associated with Sri Vaishnavism and Sri Ramanuja."
+        },
+        {
+            "name": "Chitrakoot Ghats",
+            "city": "Chitrakoot",
+            "state": "Madhya Pradesh",
+            "description": "Sacred ghats on the Mandakini River, associated with Lord Rama’s exile period."
+        },
+        {
+            "name": "Triveni Sangam",
+            "city": "Prayagraj",
+            "state": "Uttar Pradesh",
+            "description": "The confluence of the Ganga, Yamuna, and mythical Saraswati rivers; a major pilgrimage site."
+        }
+    ],
+    "maxParticipants": 50,
+    "startDate": "2025-10-28",
+    "endDate": "2025-11-07",
+    "status": "active"
+}

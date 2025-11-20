@@ -1,15 +1,7 @@
 import axios from 'axios'
 
 // Use relative URL since Vite proxy will handle routing to backend
-//const API_BASE_URL = '/api'
-
-/*const API_BASE_URL =
-  import.meta.env.PROD
-    ? "https://tourpilgrimageportal.onrender.com"
-    : "/api"; // let proxy handle i
-  */
-
-const API_BASE_URL = 'https://tourpilgrimageportal.onrender.com/api'
+const API_BASE_URL = '/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -668,6 +660,38 @@ export interface Member {
   displayInfo?: string
 }
 
+// Parts Type
+export interface Part {
+  _id: string
+  section: string
+  sectionDescription: string
+  memberName: string
+  noOfPersons: number
+  sradam: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+// Parts API
+export const partsAPI = {
+  // Get all parts
+  getAll: () => api.get<Part[]>('/parts'),
+
+  // Get single part
+  getById: (id: string) => api.get<Part>(`/parts/${id}`),
+
+  // Create new part
+  create: (partData: Omit<Part, '_id' | 'createdAt' | 'updatedAt'>) => 
+    api.post<{ message: string; part: Part }>('/parts', partData),
+
+  // Update part
+  update: (id: string, partData: Partial<Omit<Part, '_id' | 'createdAt' | 'updatedAt'>>) => 
+    api.put<{ message: string; part: Part }>(`/parts/${id}`, partData),
+
+  // Delete part
+  delete: (id: string) => api.delete<{ message: string }>(`/parts/${id}`)
+}
+
 // Misc API
 export const miscAPI = {
   // Get all members with filters
@@ -719,6 +743,148 @@ export const miscAPI = {
       avgAge: number
     }>
   }>('/misc/stats/summary')
+}
+
+// Member Contact Types
+export interface MemberContact {
+  _id?: string
+  memberId: string
+  personalInfo: {
+    firstName: string
+    middleName?: string
+    lastName: string
+    dateOfBirth: string
+    age: number
+    gender: 'Male' | 'Female' | 'Other'
+    maritalStatus: 'Single' | 'Married' | 'Widowed' | 'Divorced'
+    bloodGroup?: string
+    occupation?: string
+    education?: string
+  }
+  addressInfo: {
+    addressLine1: string
+    addressLine2?: string
+    city: string
+    state: string
+    pincode: string
+    country: string
+  }
+  contactInfo: {
+    primaryPhone: string
+    alternatePhone?: string
+    email: string
+    whatsappNumber?: string
+    emergencyContact: {
+      name: string
+      relationship: string
+      phone: string
+    }
+  }
+  spiritualInfo: {
+    gothra: string
+    nakshatra: string
+    rashi?: string
+    acharyanName?: string
+    guruName?: string
+    initiationDate?: string
+    spiritualLineage?: string
+  }
+  templePreferences: {
+    preferredDeity: string[]
+    preferredUtsavams: string[]
+    visitFrequency: 'Daily' | 'Weekly' | 'Monthly' | 'Occasionally'
+    preferredTemples: string[]
+    volunteerInterest: boolean
+    donationPreference?: 'Anna Dhanam' | 'Temple Maintenance' | 'Festivals' | 'General'
+  }
+  religiousActivities: {
+    dailyPuja: boolean
+    vedicChanting: boolean
+    bhajansInterest: boolean
+    scriptureStudy: boolean
+    meditationPractice: boolean
+    yogaPractice: boolean
+    participatesInSatsang: boolean
+    languagesKnown: string[]
+  }
+  pilgrimageHistory?: Array<{
+    templeVisited: string
+    location: string
+    visitDate: string
+    tourPackage?: string
+    notes?: string
+  }>
+  dietaryRestrictions?: string[]
+  specialNeeds?: string
+  membershipType: 'Regular' | 'Premium' | 'Lifetime' | 'Family'
+  membershipStartDate: string
+  status: 'Active' | 'Inactive' | 'Suspended'
+  notes?: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+// Member Contacts API
+export const memberContactsAPI = {
+  // Get all member contacts with filters
+  getAll: (params?: {
+    search?: string
+    status?: string
+    membershipType?: string
+    gothra?: string
+    nakshatra?: string
+    page?: number
+    limit?: number
+  }) => api.get<{
+    members: MemberContact[]
+    pagination: {
+      total: number
+      page: number
+      pages: number
+      limit: number
+    }
+  }>('/member-contacts', { params }),
+
+  // Get single member contact
+  getById: (id: string) => api.get<MemberContact>(`/member-contacts/${id}`),
+
+  // Create new member contact
+  create: (memberData: Omit<MemberContact, '_id' | 'createdAt' | 'updatedAt'>) => 
+    api.post<{ message: string; member: MemberContact }>('/member-contacts', memberData),
+
+  // Update member contact
+  update: (id: string, memberData: Partial<Omit<MemberContact, '_id' | 'createdAt' | 'updatedAt'>>) => 
+    api.put<{ message: string; member: MemberContact }>(`/member-contacts/${id}`, memberData),
+
+  // Delete member contact
+  delete: (id: string) => api.delete<{ message: string }>(`/member-contacts/${id}`),
+
+  // Get member statistics
+  getStats: () => api.get<{
+    totalMembers: number
+    activeMembers: number
+    volunteers: number
+    lifetimeMembers: number
+    membershipTypes: Array<{
+      type: string
+      count: number
+    }>
+    gothraCounts: Array<{
+      gothra: string
+      count: number
+    }>
+  }>('/member-contacts/stats/summary'),
+
+  // Search members by spiritual preferences
+  searchBySpiritual: (params: {
+    gothra?: string
+    nakshatra?: string
+    deity?: string
+    utsavam?: string
+  }) => api.get<{ members: MemberContact[] }>('/member-contacts/search/spiritual', { params }),
+
+  // Get members interested in volunteering
+  getVolunteers: () => api.get<{ volunteers: MemberContact[] }>('/member-contacts/volunteers')
 }
 
 export default api

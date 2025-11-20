@@ -327,6 +327,7 @@ const ExpensesPage: React.FC = () => {
         <div className="pageHeader">
           <Row className="align-items-center">
             <Col>
+              <h1 className="pageTitle">💰 Expense Management</h1>
               <p className="pageSubtitle">Track and manage tour expenses across all categories</p>
             </Col>
             <Col xs="auto">
@@ -683,7 +684,7 @@ const ExpensesPage: React.FC = () => {
         </Tabs>
 
         {/* Add/Edit Expense Modal */}
-        <Modal show={showExpenseModal} onHide={() => setShowExpenseModal(false)} size="xl" className="expensesPage">
+        <Modal show={showExpenseModal} onHide={() => setShowExpenseModal(false)} size="xl">
           <Modal.Header closeButton>
             <Modal.Title>
               {editingExpense ? '✏️ Edit Expense' : '➕ Add New Expense'}
@@ -692,7 +693,7 @@ const ExpensesPage: React.FC = () => {
           <Form onSubmit={handleSaveExpense}>
             <Modal.Body>
               <Tabs defaultActiveKey="basic" className="mb-3">
-                <Tab eventKey="basic" title="📋 Basic Info">
+                <Tab eventKey="basic" title="Basic Info">
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
@@ -811,7 +812,7 @@ const ExpensesPage: React.FC = () => {
                   </Form.Group>
                 </Tab>
 
-                <Tab eventKey="vendor" title="📍 Vendor & Location">
+                <Tab eventKey="vendor" title="Vendor & Location">
                   <h6>👤 Vendor Information</h6>
                   <Row>
                     <Col md={4}>
@@ -896,8 +897,8 @@ const ExpensesPage: React.FC = () => {
               <Button variant="secondary" onClick={() => setShowExpenseModal(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit">
-                {editingExpense ? '💾 Update Expense' : '💾 Save Expense'}
+              <Button variant="success" type="submit">
+                {editingExpense ? 'Update Expense' : 'Save Expense'}
               </Button>
             </Modal.Footer>
           </Form>

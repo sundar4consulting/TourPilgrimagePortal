@@ -43,9 +43,10 @@ const HomePage: React.FC = () => {
         <Container>
           <Row className="align-items-center">
             <Col lg={6}>
-                            <h1 className="display-4 fw-bold mb-3">Sri Vishnu Chitta Yatra</h1>
+              <h1 className="display-4 fw-bold mb-3">Sri Vishnu Chitra Yatra</h1>
               <p className="lead mb-4">
-                Embark on sacred journeys to divine destinations across India. Experience spiritual transformation through our carefully curated pilgrimage tours.
+                Embark on sacred journeys to divine destinations across India. 
+                Experience spiritual transformation through our carefully curated pilgrimage tours.
               </p>
               <div className="d-flex gap-3">
                 <Button 

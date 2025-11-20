@@ -1,18 +1,7 @@
 const mongoose = require('mongoose');
 
 const memberSchema = new mongoose.Schema({
-  section: {
-    type: String,
-    required: [true, 'Section is required'],
-    trim: true,
-    maxlength: [10, 'Section cannot exceed 10 characters']
-  },
-  section_desc: {
-    type: String,
-    required: [true, 'Section description is required'],
-    trim: true,
-    maxlength: [200, 'Section description cannot exceed 200 characters']
-  },
+  // section and section_desc removed; now in PARTS schema
   s_no: {
     type: Number,
     required: [true, 'Serial number is required'],
@@ -59,6 +48,30 @@ const memberSchema = new mongoose.Schema({
       },
       message: 'AADAR number must be 12 digits'
     }
+  },
+  persons: {
+    type: Number,
+    default: null
+  },
+  sram: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  fwdJny: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  rtnJny: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  notes: {
+    type: String,
+    trim: true,
+    default: ''
   },
   // Audit fields
   createdBy: {

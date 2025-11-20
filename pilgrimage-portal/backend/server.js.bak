@@ -95,7 +95,6 @@ app.use('/api/accommodations', require('./routes/accommodations'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/misc', require('./routes/misc'));
 app.use('/api/parts', require('./routes/parts'));
-app.use('/api/member-contacts', require('./routes/memberContacts'));
 // app.use('/api/tourParticipants', require('./routes/tourParticipants'));
 // Note: Search and export routes will be added after fixing the router issue
 

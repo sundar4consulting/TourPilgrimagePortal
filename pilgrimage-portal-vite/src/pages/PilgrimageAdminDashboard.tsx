@@ -3,9 +3,10 @@ import { Container, Row, Col, Card, Table, Button, Badge, Alert, Modal, Form } f
 import { useLocation } from 'react-router-dom';
 import PilgrimageAdminSidebar from '../components/PilgrimageAdminSidebar';
 import AccommodationsPage from './AccommodationsPage';
+import MemberContactsPage from './MemberContactsPage';
 import MiscPage from './MiscPage';
 import ExpensesPage from './ExpensesPage';
-import { toursAPI, bookingsAPI, authAPI, type Tour, type Booking } from '../services/api';
+import { toursAPI, bookingsAPI, expensesAPI, authAPI, type Tour, type Booking, type Expense, type User } from '../services/api';
 import './PilgrimageAdminDashboard.css';
 
 const PilgrimageAdminDashboard: React.FC = () => {
@@ -18,6 +19,8 @@ const PilgrimageAdminDashboard: React.FC = () => {
     if (path.includes('/expenses')) return 'expenses';
     if (path.includes('/tours')) return 'tours';
     if (path.includes('/accommodations')) return 'accommodations';
+    if (path.includes('/member-contacts')) return 'member-contacts';
+    if (path.includes('/misc')) return 'misc';
     if (path.includes('/bookings')) return 'bookings';
     if (path.includes('/analytics')) return 'analytics';
     if (path.includes('/approvals')) return 'approvals';
@@ -29,19 +32,38 @@ const PilgrimageAdminDashboard: React.FC = () => {
   const [tours, setTours] = useState<Tour[]>([]);
   const [currentTourIndex, setCurrentTourIndex] = useState(0);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   // Modal states
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
-  //const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const [showFamilyMemberModal, setShowFamilyMemberModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
-  //const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const [selectedBookingForFamily, setSelectedBookingForFamily] = useState<any>(null);
   const [showAddBookingModal, setShowAddBookingModal] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+
+  // Form states (without _id for new items)
+  const [expenseForm, setExpenseForm] = useState<any>({
+    tour: '',
+    addedBy: '',
+    category: 'transportation',
+    description: '',
+    amount: 0,
+    expenseDate: '',
+    location: { name: '', address: '' },
+    vendor: { name: '', contact: '', address: '' },
+    paymentMethod: 'cash',
+    receiptNumber: '',
+    isApproved: false,
+    notes: ''
+  });
 
   const [tourForm, setTourForm] = useState<any>({
     title: '',
@@ -102,14 +124,16 @@ const PilgrimageAdminDashboard: React.FC = () => {
         setError(null);
         console.log('Fetching dashboard data...');
         
-        const [toursResponse, bookingsResponse] = await Promise.all([
+        const [toursResponse, bookingsResponse, expensesResponse] = await Promise.all([
           toursAPI.getAll({ limit: 100 }), // Get more tours for better stats
-          bookingsAPI.getAll()
+          bookingsAPI.getAll(),
+          expensesAPI.getAll()
         ]);
         
         console.log('API Responses:', {
           tours: toursResponse.data,
-          bookings: bookingsResponse.data
+          bookings: bookingsResponse.data,
+          expenses: expensesResponse.data
         });
         
         // Handle tours response - it returns paginated data
@@ -124,6 +148,13 @@ const PilgrimageAdminDashboard: React.FC = () => {
           setBookings(bookingsResponse.data);
         } else {
           setBookings([]);
+        }
+        
+        // Handle expenses response - it returns array directly
+        if (expensesResponse.data && Array.isArray(expensesResponse.data)) {
+          setExpenses(expensesResponse.data);
+        } else {
+          setExpenses([]);
         }
         
       } catch (error: any) {
@@ -169,6 +200,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
     }, 0),
     totalBookings: bookings.length,
     activeTours: tours.filter(tour => tour.status === 'published').length,
+    totalExpenses: expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0),
     pendingApprovals: bookings.filter(booking => 
       booking.status === 'interested' || 
       booking.paymentStatus === 'pending'
@@ -196,9 +228,10 @@ const PilgrimageAdminDashboard: React.FC = () => {
   // Data refresh function
   const refreshData = async () => {
     try {
-      const [toursResponse, bookingsResponse] = await Promise.all([
+      const [toursResponse, bookingsResponse, expensesResponse] = await Promise.all([
         toursAPI.getAll({ limit: 100 }),
-        bookingsAPI.getAll()
+        bookingsAPI.getAll(),
+        expensesAPI.getAll()
       ]);
       
       if (toursResponse.data?.tours && Array.isArray(toursResponse.data.tours)) {
@@ -207,9 +240,51 @@ const PilgrimageAdminDashboard: React.FC = () => {
       if (bookingsResponse.data && Array.isArray(bookingsResponse.data)) {
         setBookings(bookingsResponse.data);
       }
+      if (expensesResponse.data && Array.isArray(expensesResponse.data)) {
+        setExpenses(expensesResponse.data);
+      }
     } catch (error: any) {
       console.error('Error refreshing data:', error);
       setError('Failed to refresh data');
+    }
+  };
+
+  // Expense CRUD handlers
+  const handleSaveExpense = async () => {
+    try {
+      if (editingExpense) {
+        await expensesAPI.update(editingExpense._id, expenseForm);
+        setSuccess('Expense updated successfully');
+      } else {
+        await expensesAPI.create(expenseForm);
+        setSuccess('Expense created successfully');
+      }
+      setShowExpenseModal(false);
+      refreshData();
+    } catch (error: any) {
+      setError('Failed to save expense');
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (window.confirm('Are you sure you want to delete this expense?')) {
+      try {
+        await expensesAPI.delete(expenseId);
+        setSuccess('Expense deleted successfully');
+        refreshData();
+      } catch (error: any) {
+        setError('Failed to delete expense');
+      }
+    }
+  };
+
+  const handleApproveExpense = async (expenseId: string, isApproved: boolean) => {
+    try {
+      await expensesAPI.update(expenseId, { isApproved });
+      setSuccess(`Expense ${isApproved ? 'approved' : 'rejected'} successfully`);
+      refreshData();
+    } catch (error: any) {
+      setError(`Failed to ${isApproved ? 'approve' : 'reject'} expense`);
     }
   };
 
@@ -369,14 +444,16 @@ const PilgrimageAdminDashboard: React.FC = () => {
         return renderToursContent();
       case 'accommodations':
         return <AccommodationsPage />;
+      case 'member-contacts':
+        return <MemberContactsPage />;
+      case 'misc':
+        return <MiscPage />;
       case 'bookings':
         return renderBookingsContent();
       case 'analytics':
         return renderAnalyticsContent();
       case 'approvals':
         return renderApprovalsContent();
-      case 'misc':
-        return <MiscPage />;
       default:
         return renderHomeContent();
     }
@@ -696,6 +773,142 @@ const PilgrimageAdminDashboard: React.FC = () => {
     </>
   );
 
+  const renderExpensesContent = () => (
+    <Row className="g-4">
+      <Col>
+        <Card className="pilgrimage-table-card">
+          <Card.Header className="pilgrimage-card-header">
+            <h5>Expense Management</h5>
+            <Button 
+              variant="primary" 
+              size="sm"
+              onClick={() => {
+                setExpenseForm({
+                  tour: '',
+                  addedBy: '',
+                  category: 'transportation',
+                  description: '',
+                  amount: 0,
+                  expenseDate: '',
+                  location: { name: '', address: '' },
+                  vendor: { name: '', contact: '', address: '' },
+                  paymentMethod: 'cash' as const,
+                  receiptNumber: '',
+                  isApproved: false,
+                  notes: ''
+                });
+                setEditingExpense(null);
+                setShowExpenseModal(true);
+              }}
+            >
+              <i className="fas fa-plus me-2"></i>Add New Expense
+            </Button>
+          </Card.Header>
+          <Card.Body>
+            <Table responsive className="pilgrimage-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Tour</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.length > 0 ? (
+                  expenses.map((expense) => (
+                    <tr key={expense._id}>
+                      <td>{new Date(expense.expenseDate).toLocaleDateString()}</td>
+                      <td>
+                        <Badge bg="info">{expense.category}</Badge>
+                      </td>
+                      <td>{expense.description}</td>
+                      <td>₹{expense.amount.toLocaleString()}</td>
+                      <td>
+                        {typeof expense.tour === 'object' && expense.tour ? 
+                          expense.tour.title : 
+                          'General'
+                        }
+                      </td>
+                      <td>
+                        <Badge 
+                          bg={expense.isApproved ? 'success' : 'warning'}
+                        >
+                          {expense.isApproved ? 'Approved' : 'Pending'}
+                        </Badge>
+                      </td>
+                      <td>
+                        {!expense.isApproved && (
+                          <Button 
+                            size="sm" 
+                            variant="outline-success" 
+                            className="me-1"
+                            onClick={() => handleApproveExpense(expense._id, true)}
+                            title="Approve"
+                          >
+                            <i className="fas fa-check"></i>
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm" 
+                          variant="outline-primary" 
+                          className="me-1"
+                          onClick={() => {
+                            setEditingExpense(expense);
+                            setExpenseForm({
+                              tour: typeof expense.tour === 'object' ? expense.tour._id : expense.tour,
+                              addedBy: expense.addedBy || '',
+                              category: expense.category,
+                              description: expense.description,
+                              amount: expense.amount,
+                              expenseDate: expense.expenseDate,
+                              location: expense.location || { name: '', address: '' },
+                              vendor: {
+                                name: expense.vendor?.name || '',
+                                contact: expense.vendor?.contact || '',
+                                address: expense.vendor?.address || ''
+                              },
+                              paymentMethod: expense.paymentMethod || 'cash',
+                              receiptNumber: expense.receiptNumber || '',
+                              isApproved: expense.isApproved,
+                              notes: expense.notes || ''
+                            });
+                            setShowExpenseModal(true);
+                          }}
+                          title="Edit"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline-danger"
+                          onClick={() => handleDeleteExpense(expense._id)}
+                          title="Delete"
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="text-center text-muted py-4">
+                      <i className="fas fa-wallet fa-2x mb-2 d-block"></i>
+                      No expenses found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  );
+
   const renderToursContent = () => (
     <Row className="g-4">
       <Col>
@@ -725,8 +938,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 setShowTourModal(true);
               }}
             >
-              <i className="fas fa-plus me-2"></i>
-              <span className="stylish-yellow-gradient">Add New Tour</span>
+              <i className="fas fa-plus me-2"></i>Add New Tour
             </Button>
           </Card.Header>
           <Card.Body>
@@ -1067,14 +1279,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             </Button>
             
             <h1 className="pilgrimage-page-title">
-              {activeTab === 'home' && 'Sri Vishnu Chitta'}
-              {activeTab === 'expenses' && 'Expenses'}
-              {activeTab === 'tours' && 'Tours'}
-              {activeTab === 'accommodations' && 'Accommodations'}
-              {activeTab === 'bookings' && 'Bookings'}
-              {activeTab === 'analytics' && 'Analytics'}
-              {activeTab === 'approvals' && 'Approvals'}
-              {activeTab === 'misc' && 'Misc'}
+              Sri Vishnu Chitra
             </h1>
             <div className="pilgrimage-topbar-actions">
               <Button 
@@ -1124,21 +1329,116 @@ const PilgrimageAdminDashboard: React.FC = () => {
         </Alert>
       )}
 
-      {/* Tour Modal */}
-      <Modal show={showTourModal} onHide={() => setShowTourModal(false)} size="lg">
+      {/* Expense Modal */}
+      <Modal show={showExpenseModal} onHide={() => setShowExpenseModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>
-            <span className="stylish-modal-title">
-              {editingTour ? 'Edit Tour' : 'Add New Tour'}
-            </span>
-          </Modal.Title>
+          <Modal.Title>{editingExpense ? 'Edit Expense' : 'Add New Expense'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Tour Title</Form.Label>
+                  <Form.Label>Category</Form.Label>
+                  <Form.Select
+                    value={expenseForm.category || ''}
+                    onChange={(e) => setExpenseForm({...expenseForm, category: e.target.value})}
+                  >
+                    <option value="transportation">Transportation</option>
+                    <option value="accommodation">Accommodation</option>
+                    <option value="food">Food & Meals</option>
+                    <option value="activities">Activities</option>
+                    <option value="guides">Guide Services</option>
+                    <option value="permits">Permits & Fees</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="emergency">Emergency</option>
+                    <option value="miscellaneous">Miscellaneous</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Amount</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={expenseForm.amount || 0}
+                    onChange={(e) => setExpenseForm({...expenseForm, amount: parseFloat(e.target.value)})}
+                    placeholder="Enter amount"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                type="text"
+                value={expenseForm.description || ''}
+                onChange={(e) => setExpenseForm({...expenseForm, description: e.target.value})}
+                placeholder="Enter expense description"
+              />
+            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Expense Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={expenseForm.expenseDate || ''}
+                    onChange={(e) => setExpenseForm({...expenseForm, expenseDate: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Payment Method</Form.Label>
+                  <Form.Select
+                    value={expenseForm.paymentMethod || ''}
+                    onChange={(e) => setExpenseForm({...expenseForm, paymentMethod: e.target.value})}
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                    <option value="netbanking">Net Banking</option>
+                    <option value="other">Other</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Associated Tour (Optional)</Form.Label>
+              <Form.Select
+                value={typeof expenseForm.tour === 'string' ? expenseForm.tour : ''}
+                onChange={(e) => setExpenseForm({...expenseForm, tour: e.target.value})}
+              >
+                <option value="">Select tour (optional)</option>
+                {tours.map(tour => (
+                  <option key={tour._id} value={tour._id}>{tour.title}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowExpenseModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveExpense}>
+            {editingExpense ? 'Update Expense' : 'Add Expense'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Tour Modal */}
+      <Modal show={showTourModal} onHide={() => setShowTourModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{editingTour ? 'Edit Tour' : 'Add New Tour'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Tour Title</Form.Label>
                   <Form.Control
                     type="text"
                     value={tourForm.title || ''}
@@ -1149,7 +1449,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Category</Form.Label>
+                  <Form.Label>Category</Form.Label>
                   <Form.Select
                     value={tourForm.category || ''}
                     onChange={(e) => setTourForm({...tourForm, category: e.target.value})}
@@ -1165,7 +1465,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Days</Form.Label>
+                  <Form.Label>Days</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.duration?.days || 0}
@@ -1178,7 +1478,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Nights</Form.Label>
+                  <Form.Label>Nights</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.duration?.nights || 0}
@@ -1191,7 +1491,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Max Participants</Form.Label>
+                  <Form.Label>Max Participants</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.maxParticipants || 0}
@@ -1203,7 +1503,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Adult Price</Form.Label>
+                  <Form.Label>Adult Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.adult || 0}
@@ -1216,7 +1516,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Child Price</Form.Label>
+                  <Form.Label>Child Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.child || 0}
@@ -1229,7 +1529,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Senior Price</Form.Label>
+                  <Form.Label>Senior Price</Form.Label>
                   <Form.Control
                     type="number"
                     value={tourForm.pricing?.senior || 0}
@@ -1244,7 +1544,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Start Date</Form.Label>
+                  <Form.Label>Start Date</Form.Label>
                   <Form.Control
                     type="date"
                     value={tourForm.startDate || ''}
@@ -1254,7 +1554,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">End Date</Form.Label>
+                  <Form.Label>End Date</Form.Label>
                   <Form.Control
                     type="date"
                     value={tourForm.endDate || ''}
@@ -1264,7 +1564,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               </Col>
             </Row>
             <Form.Group className="mb-3">
-              <Form.Label className="stylish-form-label">Description</Form.Label>
+              <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -1274,7 +1574,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className="stylish-form-label">Short Description</Form.Label>
+              <Form.Label>Short Description</Form.Label>
               <Form.Control
                 type="text"
                 value={tourForm.shortDescription || ''}
@@ -1282,150 +1582,23 @@ const PilgrimageAdminDashboard: React.FC = () => {
                 placeholder="Enter short description"
               />
             </Form.Group>
-            
-            {/* Destinations Section */}
-            <Form.Group className="mb-3">
-              <Form.Label className="stylish-form-label">Destinations <span className="text-danger">*</span></Form.Label>
-              <div className="border rounded p-3 bg-light">
-                {tourForm.destinations && tourForm.destinations.length > 0 ? (
-                  <div className="mb-3">
-                    {tourForm.destinations.map((dest: any, index: number) => (
-                      <div key={index} className="d-flex align-items-center mb-2 bg-white p-2 rounded border">
-                        <div className="flex-grow-1">
-                          <strong>{dest.name}</strong>, {dest.city}, {dest.state}
-                          {dest.description && <small className="text-muted d-block">{dest.description}</small>}
-                        </div>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {
-                            const newDests = tourForm.destinations.filter((_: any, i: number) => i !== index);
-                            setTourForm({...tourForm, destinations: newDests});
-                          }}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Alert variant="warning" className="mb-3">
-                    <i className="fas fa-exclamation-triangle me-2"></i>
-                    No destinations added yet. Add at least one destination.
-                  </Alert>
-                )}
-                
-                <div className="border-top pt-3">
-                  <h6 className="mb-3"><i className="fas fa-plus-circle me-2"></i>Add New Destination</h6>
-                  <Row>
-                    <Col md={4}>
-                      <Form.Group className="mb-2">
-                        <Form.Label className="stylish-form-label">Place Name</Form.Label>
-                        <Form.Control
-                          type="text"
-                          id="destName"
-                          placeholder="e.g., Tirupati Temple"
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={3}>
-                      <Form.Group className="mb-2">
-                        <Form.Label className="stylish-form-label">City</Form.Label>
-                        <Form.Control
-                          type="text"
-                          id="destCity"
-                          placeholder="e.g., Tirupati"
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={3}>
-                      <Form.Group className="mb-2">
-                        <Form.Label className="stylish-form-label">State</Form.Label>
-                        <Form.Control
-                          type="text"
-                          id="destState"
-                          placeholder="e.g., Andhra Pradesh"
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={2}>
-                      <Form.Group className="mb-2">
-                        <Form.Label className="stylish-form-label">Region</Form.Label>
-                        <Form.Select id="destRegion" defaultValue="">
-                          <option value="" disabled>Select Region</option>
-                          <option value="north-india">North India</option>
-                          <option value="south-india">South India</option>
-                          <option value="east-india">East India</option>
-                          <option value="west-india">West India</option>
-                          <option value="central-india">Central India</option>
-                          <option value="northeast-india">Northeast India</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      <Form.Group className="mb-2">
-                        <Form.Label className="stylish-form-label">Description (Optional)</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          rows={2}
-                          id="destDescription"
-                          placeholder="Brief description of the destination"
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => {
-                      const name = (document.getElementById('destName') as HTMLInputElement)?.value;
-                      const city = (document.getElementById('destCity') as HTMLInputElement)?.value;
-                      const state = (document.getElementById('destState') as HTMLInputElement)?.value;
-                      const region = (document.getElementById('destRegion') as HTMLSelectElement)?.value;
-                      const description = (document.getElementById('destDescription') as HTMLTextAreaElement)?.value;
-                      if (name && city && state && region) {
-                        const newDest = { name, city, state, region, description };
-                        setTourForm({
-                          ...tourForm,
-                          destinations: [...(tourForm.destinations || []), newDest]
-                        });
-                        // Clear inputs
-                        (document.getElementById('destName') as HTMLInputElement).value = '';
-                        (document.getElementById('destCity') as HTMLInputElement).value = '';
-                        (document.getElementById('destState') as HTMLInputElement).value = '';
-                        (document.getElementById('destRegion') as HTMLSelectElement).value = '';
-                        (document.getElementById('destDescription') as HTMLTextAreaElement).value = '';
-                      } else {
-                        alert('Please fill in Place Name, City, State, and Region');
-                      }
-                    }}
-                  >
-                    <i className="fas fa-plus me-2"></i>Add Destination
-                  </Button>
-                </div>
-              </div>
-            </Form.Group>
-            
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Status</Form.Label>
+                  <Form.Label>Status</Form.Label>
                   <Form.Select
-                    value={tourForm.status || 'active'}
+                    value={tourForm.status || 'draft'}
                     onChange={(e) => setTourForm({...tourForm, status: e.target.value})}
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="completed">Completed</option>
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
                     <option value="cancelled">Cancelled</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label className="stylish-form-label">Difficulty</Form.Label>
+                  <Form.Label>Difficulty</Form.Label>
                   <Form.Select
                     value={tourForm.difficulty || 'easy'}
                     onChange={(e) => setTourForm({...tourForm, difficulty: e.target.value})}

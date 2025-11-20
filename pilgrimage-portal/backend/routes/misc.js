@@ -165,7 +165,12 @@ router.post('/', adminAuth, async (req, res) => {
       name_aadhar,
       gender,
       age,
-      aadhar_no
+      aadhar_no,
+      persons,
+      sram,
+      fwdJny,
+      rtnJny,
+      notes
     } = req.body;
 
     // Validate required fields
@@ -255,8 +260,13 @@ router.put('/:id', adminAuth, async (req, res) => {
     if (group_s_no !== undefined) member.group_s_no = group_s_no;
     if (name_aadhar !== undefined) member.name_aadhar = name_aadhar;
     if (gender !== undefined) member.gender = gender;
-    if (age !== undefined) member.age = age || null;
-    if (aadhar_no !== undefined) member.aadhar_no = aadhar_no || null;
+  if (age !== undefined) member.age = age || null;
+  if (aadhar_no !== undefined) member.aadhar_no = aadhar_no || null;
+  if (persons !== undefined) member.persons = persons;
+  if (sram !== undefined) member.sram = sram;
+  if (fwdJny !== undefined) member.fwdJny = fwdJny;
+  if (rtnJny !== undefined) member.rtnJny = rtnJny;
+  if (notes !== undefined) member.notes = notes;
     
     member.updatedBy = req.user._id;
 

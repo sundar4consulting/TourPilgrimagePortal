@@ -43,6 +43,12 @@ const PilgrimageAdminSidebar: React.FC<PilgrimageAdminSidebarProps> = ({
       gradient: 'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)'
     },
     {
+      key: 'member-contacts',
+      icon: 'fa-address-book',
+      label: 'Member Contacts',
+      gradient: 'linear-gradient(135deg, #9795f0 0%, #fbc8d4 100%)'
+    },
+    {
       key: 'bookings',
       icon: 'fa-ticket-alt',
       label: 'Bookings',
@@ -78,7 +84,7 @@ const PilgrimageAdminSidebar: React.FC<PilgrimageAdminSidebarProps> = ({
             <i className="fas fa-om text-white"></i>
             {!isMinimized && (
               <div className="pilgrimage-brand-info">
-                <span className="pilgrimage-brand-text">Sri Vishnu Chitta Yatra</span>
+                <span className="pilgrimage-brand-text">Sri Vishnu Chitra Yatra</span>
                 <span className="pilgrimage-brand-subtitle">Spiritual Journeys</span>
               </div>
             )}

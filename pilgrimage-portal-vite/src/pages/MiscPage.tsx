@@ -1,209 +1,193 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Modal, Form, Alert, Badge, Tabs, Tab } from 'react-bootstrap';
-import { miscAPI, Member } from '../services/api';
-import './MiscPage.css';
+import { miscAPI, partsAPI, Member as MemberBase, Part } from '../services/api';
+// Extend Member type locally to allow extra fields for UI editing
+type Member = Omit<MemberBase, 'persons'> & {
+  persons?: number | null;
+  sram?: string;
+  fwdJny?: string;
+  rtnJny?: string;
+  notes?: string;
+};
 
 const MiscPage: React.FC = () => {
+  // State and hooks
   const [members, setMembers] = useState<Member[]>([]);
+  const [parts, setParts] = useState<Part[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // Pagination and filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalMembers, setTotalMembers] = useState(0);
+  // Removed unused: totalPages, totalMembers
   const [filters, setFilters] = useState({
-    section: '',
     gender: '',
     search: '',
     sortBy: 's_no',
-    sortOrder: 'asc' as 'asc' | 'desc'
+    sortOrder: 'asc' as 'asc' | 'desc',
   });
-
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  // Edit modal state
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
-
-  // Form state
   const [memberForm, setMemberForm] = useState({
-    section: '',
-    section_desc: '',
     s_no: 1,
     mob_s_no: 1,
     group_s_no: 1,
     name_aadhar: '',
-    gender: 'M' as 'M' | 'F',
+    gender: 'M',
     age: null as number | null,
-    aadhar_no: ''
+    aadhar_no: '',
+    fwdJny: '',
+    rtnJny: '',
+    notes: ''
   });
-
-  // Statistics state
-  const [statistics, setStatistics] = useState({
+  const [activeTab, setActiveTab] = useState('list');
+  const [statistics, setStatistics] = useState<any>({
     totalMembers: 0,
     maleCount: 0,
     femaleCount: 0,
     averageAge: 0,
-    sectionStats: [] as Array<{ _id: string; count: number; avgAge: number }>
+    sectionStats: [],
   });
 
-  // Active tab
-  const [activeTab, setActiveTab] = useState('list');
 
-  // Fetch members
+  // Real fetch functions
   const fetchMembers = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const params: any = {
-        page: currentPage,
-        limit: 20,
+      const res = await miscAPI.getAll({
+        gender: filters.gender,
+        search: filters.search,
         sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder
-      };
-
-      if (filters.section) params.section = filters.section;
-      if (filters.gender) params.gender = filters.gender;
-      if (filters.search) params.search = filters.search;
-
-      const response = await miscAPI.getAll(params);
-      setMembers(response.data.members);
-      setTotalPages(response.data.pagination.pages);
-      setTotalMembers(response.data.pagination.total);
-      setError(null);
+        sortOrder: filters.sortOrder,
+        page: currentPage,
+        limit: 20
+      });
+  setMembers(res.data.members as Member[]);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch members');
-      console.error('Error fetching members:', err);
+      setMembers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch statistics
-  const fetchStatistics = async () => {
+  const fetchParts = async () => {
+    setError(null);
     try {
-      const response = await miscAPI.getStats();
+      const res = await partsAPI.getAll();
+      setParts(res.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch PARTS');
+      setParts([]);
+    }
+  };
+
+  const fetchStatistics = async () => {
+    setError(null);
+    try {
+      const res = await miscAPI.getStats();
       setStatistics({
-        totalMembers: response.data.summary.totalMembers,
-        maleCount: response.data.summary.maleCount,
-        femaleCount: response.data.summary.femaleCount,
-        averageAge: response.data.summary.averageAge,
-        sectionStats: response.data.sectionStats
+        ...res.data.summary,
+        sectionStats: res.data.sectionStats || []
       });
     } catch (err: any) {
-      console.error('Error fetching statistics:', err);
+      setError(err.response?.data?.message || 'Failed to fetch statistics');
+      setStatistics({
+        totalMembers: 0,
+        maleCount: 0,
+        femaleCount: 0,
+        averageAge: 0,
+        sectionStats: [],
+      });
     }
   };
 
+  // Load data on mount and when filters/page change
   useEffect(() => {
     fetchMembers();
-  }, [currentPage, filters]);
+    // eslint-disable-next-line
+  }, [filters.gender, filters.search, filters.sortBy, filters.sortOrder, currentPage]);
 
   useEffect(() => {
-    if (activeTab === 'statistics') {
-      fetchStatistics();
+    fetchParts();
+  }, []);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
+
+  // Handlers
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this member?')) return;
+    try {
+      await miscAPI.delete(id);
+      setSuccess('Member deleted successfully');
+      fetchMembers();
+      if (activeTab === 'statistics') fetchStatistics();
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete member');
+      console.error('Error deleting member:', err);
     }
-  }, [activeTab]);
-
-  // Handle filter change
-  const handleFilterChange = (field: string, value: string) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-    setCurrentPage(1);
   };
-
-  // Handle sort change
-  const handleSort = (field: string) => {
-    setFilters(prev => ({
-      ...prev,
-      sortBy: field,
-      sortOrder: prev.sortBy === field && prev.sortOrder === 'asc' ? 'desc' : 'asc'
-    }));
-  };
-
-  // Open modal for creating new member
-  const handleCreate = () => {
-    setIsEditing(false);
-    setCurrentMember(null);
-    setMemberForm({
-      section: '',
-      section_desc: '',
-      s_no: 1,
-      mob_s_no: 1,
-      group_s_no: 1,
-      name_aadhar: '',
-      gender: 'M',
-      age: null,
-      aadhar_no: ''
-    });
-    setShowModal(true);
-  };
-
-  // Open modal for editing member
   const handleEdit = (member: Member) => {
-    setIsEditing(true);
     setCurrentMember(member);
+    setIsEditing(true);
+    setShowModal(true);
     setMemberForm({
-      section: member.section,
-      section_desc: member.section_desc,
       s_no: member.s_no,
       mob_s_no: member.mob_s_no,
       group_s_no: member.group_s_no,
       name_aadhar: member.name_aadhar,
       gender: member.gender,
-      age: member.age || null,
-      aadhar_no: member.aadhar_no || ''
+      age: member.age ?? null,
+      aadhar_no: member.aadhar_no ?? '',
+      fwdJny: member.fwdJny ?? '',
+      rtnJny: member.rtnJny ?? '',
+      notes: member.notes ?? ''
     });
-    setShowModal(true);
   };
 
-  // Handle form submission
+  const handleCreate = () => {
+    // No-op: create not implemented
+    alert('Create functionality is not implemented in this version.');
+  };
+
+  const handleSort = (field: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      sortBy: field,
+      sortOrder: prev.sortBy === field && prev.sortOrder === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+    setCurrentPage(1);
+  };
+
+  // Optionally, handle pagination if needed
+
+  // Handle save for edit modal
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
+    if (!currentMember) return;
     try {
-      const memberData = {
-        ...memberForm,
-        age: memberForm.age || null,
-        aadhar_no: memberForm.aadhar_no || null
-      };
-
-      if (isEditing && currentMember) {
-        await miscAPI.update(currentMember._id, memberData);
-        setSuccess('Member updated successfully');
-      } else {
-        await miscAPI.create(memberData);
-        setSuccess('Member created successfully');
+      // Optional: AI suggestion for gender
+      let gender = memberForm.gender;
+      if (!gender && memberForm.name_aadhar) {
+        const name = memberForm.name_aadhar.toLowerCase();
+        if (name.endsWith('a') || name.endsWith('i')) gender = 'F';
+        else gender = 'M';
       }
-
+  await miscAPI.update(currentMember._id, { ...memberForm, gender: gender as 'M' | 'F' });
+      setSuccess('Member updated successfully');
       setShowModal(false);
       fetchMembers();
-      if (activeTab === 'statistics') {
-        fetchStatistics();
-      }
+      if (activeTab === 'statistics') fetchStatistics();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Operation failed');
-      console.error('Error saving member:', err);
-    }
-  };
-
-  // Handle delete
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this member?')) {
-      return;
-    }
-
-    try {
-      await miscAPI.delete(id);
-      setSuccess('Member deleted successfully');
-      fetchMembers();
-      if (activeTab === 'statistics') {
-        fetchStatistics();
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to delete member');
-      console.error('Error deleting member:', err);
+      setError(err.response?.data?.message || 'Failed to update member');
     }
   };
 
@@ -224,22 +208,6 @@ const MiscPage: React.FC = () => {
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                   className="enhancedFormControl"
                 />
-              </Form.Group>
-            </Col>
-            <Col md={2}>
-              <Form.Group>
-                <Form.Label className="filterLabel">Section</Form.Label>
-                <Form.Select
-                  value={filters.section}
-                  onChange={(e) => handleFilterChange('section', e.target.value)}
-                  className="enhancedFormControl"
-                >
-                  <option value="">All Sections</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </Form.Select>
               </Form.Group>
             </Col>
             <Col md={2}>
@@ -268,7 +236,6 @@ const MiscPage: React.FC = () => {
                   <option value="mob_s_no">Mob S No</option>
                   <option value="group_s_no">Group S No</option>
                   <option value="name_aadhar">Name</option>
-                  <option value="section">Section</option>
                 </Form.Select>
               </Form.Group>
             </Col>
@@ -285,18 +252,12 @@ const MiscPage: React.FC = () => {
           </Row>
         </Card.Body>
       </Card>
-
-      {/* Members Table */}
       <Card className="tableCard">
         <Card.Body>
           <div className="table-responsive">
             <Table className="membersTable" hover>
               <thead>
                 <tr>
-                  <th onClick={() => handleSort('section')} style={{ cursor: 'pointer' }}>
-                    Section {filters.sortBy === 'section' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>Section Description</th>
                   <th onClick={() => handleSort('s_no')} style={{ cursor: 'pointer' }}>
                     S.No {filters.sortBy === 's_no' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
@@ -309,6 +270,10 @@ const MiscPage: React.FC = () => {
                   <th onClick={() => handleSort('name_aadhar')} style={{ cursor: 'pointer' }}>
                     Name {filters.sortBy === 'name_aadhar' && (filters.sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
+                  <th>Aadhar Number</th>
+                  <th>FWD-JNY</th>
+                  <th>RTN-JNY</th>
+                  <th>Notes</th>
                   <th>Gender</th>
                   <th>Age</th>
                   <th>Actions</th>
@@ -317,7 +282,7 @@ const MiscPage: React.FC = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-5">
+                    <td colSpan={11} className="text-center py-5">
                       <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>
@@ -325,187 +290,166 @@ const MiscPage: React.FC = () => {
                   </tr>
                 ) : members.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-5">
-                      <i className="fas fa-users fa-3x text-muted mb-3"></i>
-                      <p className="text-muted">No members found</p>
+                    <td colSpan={11} className="text-center py-4">
+                      No members found
                     </td>
                   </tr>
                 ) : (
-                  members.map((member) => (
-                    <tr key={member._id}>
-                      <td>
-                        <Badge bg="primary">{member.section}</Badge>
-                      </td>
-                      <td>{member.section_desc}</td>
-                      <td>{member.s_no}</td>
-                      <td>{member.mob_s_no}</td>
-                      <td>{member.group_s_no}</td>
-                      <td><strong>{member.name_aadhar}</strong></td>
-                      <td>
-                        <Badge bg={member.gender === 'M' ? 'info' : 'danger'}>
-                          {member.gender === 'M' ? 'Male' : 'Female'}
-                        </Badge>
-                      </td>
-                      <td>{member.age || 'N/A'}</td>
-                      <td>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleEdit(member)}
-                        >
-                          <i className="fas fa-edit"></i>
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDelete(member._id)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
+                  <>
+                    {members.map((member) => (
+                      <tr key={member._id}>
+                        <td>{member.s_no}</td>
+                        <td>{member.mob_s_no}</td>
+                        <td>{member.group_s_no}</td>
+                        <td>{member.name_aadhar}</td>
+                        <td>{member.aadhar_no}</td>
+                        <td>{member.fwdJny ?? ''}</td>
+                        <td>{member.rtnJny ?? ''}</td>
+                        <td>{member.notes ?? ''}</td>
+                        <td>
+                          <Badge bg={member.gender === 'M' ? 'info' : 'danger'}>
+                            {member.gender === 'M' ? 'Male' : 'Female'}
+                          </Badge>
+                        </td>
+                        <td>{member.age || 'N/A'}</td>
+                        <td>
+                          <Button variant="outline-primary" size="sm" onClick={() => handleEdit(member)} className="me-2">
+                            <i className="fas fa-edit"></i>
+                          </Button>
+                          <Button variant="outline-danger" size="sm" onClick={() => handleDelete(member._id)}>
+                            <i className="fas fa-trash"></i>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
                 )}
               </tbody>
             </Table>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-between align-items-center mt-4">
-              <div className="paginationInfo">
-                Showing page {currentPage} of {totalPages} ({totalMembers} total members)
-              </div>
-              <div className="paginationControls">
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => prev - 1)}
-                  className="me-2"
-                >
-                  <i className="fas fa-chevron-left"></i> Previous
-                </Button>
-                <span className="mx-3">Page {currentPage}</span>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => prev + 1)}
-                >
-                  Next <i className="fas fa-chevron-right"></i>
-                </Button>
-              </div>
-            </div>
-          )}
         </Card.Body>
       </Card>
     </div>
   );
 
   // Render statistics tab
-  const renderStatisticsTab = () => (
-    <div className="statisticsTab">
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card className="statsCard statsCardPrimary">
-            <Card.Body>
-              <div className="statsIcon">
-                <i className="fas fa-users"></i>
-              </div>
-              <div className="statsContent">
-                <h3 className="statsValue">{statistics.totalMembers}</h3>
-                <p className="statsLabel">Total Members</p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="statsCard statsCardInfo">
-            <Card.Body>
-              <div className="statsIcon">
-                <i className="fas fa-male"></i>
-              </div>
-              <div className="statsContent">
-                <h3 className="statsValue">{statistics.maleCount}</h3>
-                <p className="statsLabel">Male Members</p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="statsCard statsCardDanger">
-            <Card.Body>
-              <div className="statsIcon">
-                <i className="fas fa-female"></i>
-              </div>
-              <div className="statsContent">
-                <h3 className="statsValue">{statistics.femaleCount}</h3>
-                <p className="statsLabel">Female Members</p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="statsCard statsCardSuccess">
-            <Card.Body>
-              <div className="statsIcon">
-                <i className="fas fa-birthday-cake"></i>
-              </div>
-              <div className="statsContent">
-                <h3 className="statsValue">{statistics.averageAge.toFixed(1)}</h3>
-                <p className="statsLabel">Average Age</p>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+  const renderStatisticsTab = () => {
+    // PART counts
+    const partCounts = { A: 0, B: 0, C: 0, D: 0 };
+    if (Array.isArray(parts)) {
+      parts.forEach((p) => {
+        const key = (p.section || '').toUpperCase();
+        if (partCounts.hasOwnProperty(key)) partCounts[key as keyof typeof partCounts]++;
+      });
+    }
 
-      <Card className="tableCard">
-        <Card.Header>
-          <h5 className="mb-0">Section-wise Distribution</h5>
-        </Card.Header>
-        <Card.Body>
-          <Table className="statisticsTable" hover>
-            <thead>
-              <tr>
-                <th>Section</th>
-                <th>Member Count</th>
-                <th>Average Age</th>
-              </tr>
-            </thead>
-            <tbody>
-              {statistics.sectionStats.length === 0 ? (
+    return (
+      <div className="statisticsTab">
+  <Row className="mb-4 g-3" xs={1} sm={2} md={5}>
+          <Col>
+            <Card className="statsCard statsCardPrimary">
+              <Card.Body>
+                <div className="statsIcon">
+                  <i className="fas fa-users"></i>
+                </div>
+                <div className="statsContent">
+                  <h3 className="statsValue">{statistics.totalMembers}</h3>
+                  <p className="statsLabel">Total Members</p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card className="statsCard statsCardInfo">
+              <Card.Body>
+                <div className="statsIcon">A</div>
+                <div className="statsContent">
+                  <h3 className="statsValue">{partCounts.A}</h3>
+                  <p className="statsLabel">PART A Count</p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card className="statsCard statsCardInfo">
+              <Card.Body>
+                <div className="statsIcon">B</div>
+                <div className="statsContent">
+                  <h3 className="statsValue">{partCounts.B}</h3>
+                  <p className="statsLabel">PART B Count</p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card className="statsCard statsCardInfo">
+              <Card.Body>
+                <div className="statsIcon">C</div>
+                <div className="statsContent">
+                  <h3 className="statsValue">{partCounts.C}</h3>
+                  <p className="statsLabel">PART C Count</p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col>
+            <Card className="statsCard statsCardInfo">
+              <Card.Body>
+                <div className="statsIcon">D</div>
+                <div className="statsContent">
+                  <h3 className="statsValue">{partCounts.D}</h3>
+                  <p className="statsLabel">PART D Count</p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <Card className="tableCard">
+          <Card.Header>
+            <h5 className="mb-0">Section-wise Distribution</h5>
+          </Card.Header>
+          <Card.Body>
+            <Table className="statisticsTable" hover>
+              <thead>
                 <tr>
-                  <td colSpan={3} className="text-center py-4">
-                    No statistics available
-                  </td>
+                  <th>Section</th>
+                  <th>Member Count</th>
+                  <th>Average Age</th>
                 </tr>
-              ) : (
-                statistics.sectionStats.map((stat) => (
-                  <tr key={stat._id}>
-                    <td>
-                      <Badge bg="primary" className="sectionBadge">
-                        {stat._id}
-                      </Badge>
+              </thead>
+              <tbody>
+                {statistics.sectionStats && statistics.sectionStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="text-center py-4">
+                      No statistics available
                     </td>
-                    <td><strong>{stat.count}</strong></td>
-                    <td>{stat.avgAge ? stat.avgAge.toFixed(1) : 'N/A'}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-    </div>
-  );
+                ) : (
+                  statistics.sectionStats && statistics.sectionStats.map((stat: any) => (
+                    <tr key={stat._id}>
+                      <td>
+                        <Badge bg="primary" className="sectionBadge">
+                          {stat._id}
+                        </Badge>
+                      </td>
+                      <td><strong>{stat.count}</strong></td>
+                      <td>{stat.avgAge ? stat.avgAge.toFixed(1) : 'N/A'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  };
 
   return (
-    <div className="miscPage">
-      {/* Main Content */}
-      <Container className="mt-4">
+    <React.Fragment>
+      <div className="miscPage">
+        {/* Main Content */}
+        <Container className="mt-4">
         {/* Alert Messages */}
         {error && (
           <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-4">
@@ -531,6 +475,58 @@ const MiscPage: React.FC = () => {
             {renderListTab()}
           </Tab>
           <Tab 
+            eventKey="parts" 
+            title={<span className="tabTitle">PARTS Details</span>}
+          >
+            {/* Tour Participants Table (Parts A, B, C, D) moved here */}
+            <Card className="mb-4">
+              <Card.Header>
+                <h5>PARTS Details (A, B, C, D)</h5>
+              </Card.Header>
+              <Card.Body>
+                {['A','B','C','D'].map((partKey) => {
+                  const grouped = parts.filter((p: any) => (p.section || '').toUpperCase() === partKey);
+                  if (grouped.length === 0) return null;
+                  // Find the first row with a sectionDescription for the header
+                  const descRow = grouped.find((row: any) => row.sectionDescription && row.sectionDescription.trim() !== '');
+                  return (
+                    <div key={partKey} style={{ marginBottom: '2.5rem' }}>
+                      {/* Section Header Row */}
+                      {descRow && (
+                        <div style={{ marginBottom: '0.5rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '0.25rem', border: '1px solid #dee2e6' }}>
+                          <strong>Section: PART {partKey}</strong>
+                          <span style={{ marginLeft: 16, color: '#555' }}>{descRow.sectionDescription}</span>
+                        </div>
+                      )}
+                      <Table bordered responsive size="sm" className="mb-0">
+                        <thead>
+                          <tr style={{ background: '#f1f3f4' }}>
+                            <th style={{ width: 60 }}>S. No.</th>
+                            <th style={{ width: 100 }}>Section</th>
+                            <th>Member</th>
+                            <th style={{ width: 120 }}>No. of Person</th>
+                            <th style={{ width: 120 }}>Sradam</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {grouped.map((row: any, idx: number) => (
+                            <tr key={row._id || idx}>
+                              <td>{idx + 1}</td>
+                              <td>PART {partKey}</td>
+                              <td>{row.memberName}</td>
+                              <td>{row.noOfPersons}</td>
+                              <td>{row.sradam}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </div>
+                  );
+                })}
+              </Card.Body>
+            </Card>
+          </Tab>
+          <Tab 
             eventKey="statistics" 
             title={<span className="tabTitle">Statistics</span>}
           >
@@ -543,167 +539,111 @@ const MiscPage: React.FC = () => {
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
         <Modal.Header closeButton className="modalHeader">
           <Modal.Title>
-            {isEditing ? 'Edit Member' : 'Add New Member'}
+            {isEditing ? '✏️ Edit Member' : '➕ Add New Member'}
           </Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSubmit}>
           <Modal.Body>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Section <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="text"
-                    required
-                    maxLength={10}
-                    value={memberForm.section}
-                    onChange={(e) => setMemberForm({ ...memberForm, section: e.target.value })}
-                    className="enhancedFormControl"
-                    placeholder="e.g., A, B, C, D"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Section Description <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="text"
-                    required
-                    maxLength={200}
-                    value={memberForm.section_desc}
-                    onChange={(e) => setMemberForm({ ...memberForm, section_desc: e.target.value })}
-                    className="enhancedFormControl"
-                    placeholder="Description or purpose"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Serial Number (S.No) <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    required
-                    min={1}
-                    value={memberForm.s_no}
-                    onChange={(e) => setMemberForm({ ...memberForm, s_no: parseInt(e.target.value) })}
-                    className="enhancedFormControl"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Mob S No <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    required
-                    min={1}
-                    value={memberForm.mob_s_no}
-                    onChange={(e) => setMemberForm({ ...memberForm, mob_s_no: parseInt(e.target.value) })}
-                    className="enhancedFormControl"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Group Serial Number <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    required
-                    min={1}
-                    value={memberForm.group_s_no}
-                    onChange={(e) => setMemberForm({ ...memberForm, group_s_no: parseInt(e.target.value) })}
-                    className="enhancedFormControl"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={8}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Name as per AADAR CARD <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="text"
-                    required
-                    maxLength={15}
-                    value={memberForm.name_aadhar}
-                    onChange={(e) => setMemberForm({ ...memberForm, name_aadhar: e.target.value.toUpperCase() })}
-                    className="enhancedFormControl"
-                    placeholder="Max 15 characters"
-                  />
-                  <Form.Text className="text-muted">
-                    Maximum 15 characters
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Gender <span className="text-danger">*</span></Form.Label>
-                  <Form.Select
-                    required
-                    value={memberForm.gender}
-                    onChange={(e) => setMemberForm({ ...memberForm, gender: e.target.value as 'M' | 'F' })}
-                    className="enhancedFormControl"
-                  >
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Age</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    max={150}
-                    value={memberForm.age || ''}
-                    onChange={(e) => setMemberForm({ 
-                      ...memberForm, 
-                      age: e.target.value ? parseInt(e.target.value) : null 
-                    })}
-                    className="enhancedFormControl"
-                    placeholder="Optional"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>AADAR Number</Form.Label>
-                  <Form.Control
-                    type="text"
-                    maxLength={12}
-                    pattern="[0-9]{12}"
-                    value={memberForm.aadhar_no}
-                    onChange={(e) => setMemberForm({ ...memberForm, aadhar_no: e.target.value })}
-                    className="enhancedFormControl"
-                    placeholder="12 digits (Optional)"
-                  />
-                  <Form.Text className="text-muted">
-                    Optional, 12 digits
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
+            <Tabs defaultActiveKey="basic" className="mb-3 modalTabs">
+              <Tab eventKey="basic" title="📋 Basic Info">
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Serial Number</Form.Label>
+                      <Form.Control type="number" value={memberForm.s_no} onChange={e => setMemberForm(f => ({ ...f, s_no: Number(e.target.value) }))} required placeholder="Enter S.No" />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Mob S No</Form.Label>
+                      <Form.Control type="number" value={memberForm.mob_s_no} onChange={e => setMemberForm(f => ({ ...f, mob_s_no: Number(e.target.value) }))} required placeholder="Enter Mob S No" />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Group S No</Form.Label>
+                      <Form.Control type="number" value={memberForm.group_s_no} onChange={e => setMemberForm(f => ({ ...f, group_s_no: Number(e.target.value) }))} required placeholder="Enter Group S No" />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={8}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Name (AADHAR)</Form.Label>
+                      <Form.Control type="text" value={memberForm.name_aadhar} onChange={e => setMemberForm(f => ({ ...f, name_aadhar: e.target.value }))} required placeholder="Enter name as per AADHAR" />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Age</Form.Label>
+                      <Form.Control type="number" value={memberForm.age ?? ''} onChange={e => setMemberForm(f => ({ ...f, age: e.target.value ? Number(e.target.value) : null }))} placeholder="Enter age" />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Gender</Form.Label>
+                      <Form.Select value={memberForm.gender} onChange={e => setMemberForm(f => ({ ...f, gender: e.target.value as 'M' | 'F' }))} required>
+                        <option value="M">👨 Male</option>
+                        <option value="F">👩 Female</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Aadhar Number</Form.Label>
+                      <Form.Control type="text" value={memberForm.aadhar_no} onChange={e => setMemberForm(f => ({ ...f, aadhar_no: e.target.value }))} placeholder="Enter AADHAR number" maxLength={12} />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Tab>
+              <Tab eventKey="journey" title="✈️ Journey Details">
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Forward Journey (FWD-JNY)</Form.Label>
+                      <Form.Control type="text" value={memberForm.fwdJny} onChange={e => setMemberForm(f => ({ ...f, fwdJny: e.target.value }))} placeholder="Enter forward journey details" />
+                      <Form.Text className="text-muted">
+                        Travel details for outbound trip
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Return Journey (RTN-JNY)</Form.Label>
+                      <Form.Control type="text" value={memberForm.rtnJny} onChange={e => setMemberForm(f => ({ ...f, rtnJny: e.target.value }))} placeholder="Enter return journey details" />
+                      <Form.Text className="text-muted">
+                        Travel details for return trip
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Notes</Form.Label>
+                      <Form.Control as="textarea" rows={3} value={memberForm.notes} onChange={e => setMemberForm(f => ({ ...f, notes: e.target.value }))} placeholder="Add any additional notes or special requirements..." />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Tab>
+            </Tabs>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <i className="fas fa-times me-2"></i>
               Cancel
             </Button>
             <Button variant="primary" type="submit" className="saveButton">
               <i className="fas fa-save me-2"></i>
-              {isEditing ? 'Update' : 'Create'} Member
+              {isEditing ? 'Update Member' : 'Add Member'}
             </Button>
           </Modal.Footer>
         </Form>
       </Modal>
     </div>
+    </React.Fragment>
   );
 };
 

@@ -152,7 +152,7 @@ const RegisterPage: React.FC = () => {
           <Card className="shadow-sm">
             <Card.Body className="p-4">
               <div className="text-center mb-4">
-                <h2 className="fw-bold text-primary">Join Sri Vishnu Chitta Yatra</h2>
+                <h2 className="fw-bold text-primary">Join Sri Vishnu Chitra Yatra</h2>
                 <p className="text-muted">Create your account to start your spiritual journey with us</p>
               </div>
 
