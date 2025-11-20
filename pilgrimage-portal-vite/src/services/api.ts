@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 // Use relative URL since Vite proxy will handle routing to backend
-const API_BASE_URL = '/api'
+const API_BASE_URL = 'https://tourpilgrimageportal.onrender.com/api'
+
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
