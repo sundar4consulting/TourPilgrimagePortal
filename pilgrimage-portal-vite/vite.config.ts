@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://tourpilgrimageportal.onrender.com',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
