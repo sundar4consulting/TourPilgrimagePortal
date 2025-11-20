@@ -6,7 +6,7 @@ import AccommodationsPage from './AccommodationsPage';
 import MemberContactsPage from './MemberContactsPage';
 import MiscPage from './MiscPage';
 import ExpensesPage from './ExpensesPage';
-import { toursAPI, bookingsAPI, expensesAPI, authAPI, type Tour, type Booking, type Expense, type User } from '../services/api';
+import { toursAPI, bookingsAPI, expensesAPI, authAPI, type Tour, type Booking, type Expense } from '../services/api';
 import './PilgrimageAdminDashboard.css';
 
 const PilgrimageAdminDashboard: React.FC = () => {
@@ -40,11 +40,9 @@ const PilgrimageAdminDashboard: React.FC = () => {
   // Modal states
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [showFamilyMemberModal, setShowFamilyMemberModal] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingExpense] = useState<Expense | null>(null);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const [selectedBookingForFamily, setSelectedBookingForFamily] = useState<any>(null);
   const [showAddBookingModal, setShowAddBookingModal] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
@@ -266,27 +264,9 @@ const PilgrimageAdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteExpense = async (expenseId: string) => {
-    if (window.confirm('Are you sure you want to delete this expense?')) {
-      try {
-        await expensesAPI.delete(expenseId);
-        setSuccess('Expense deleted successfully');
-        refreshData();
-      } catch (error: any) {
-        setError('Failed to delete expense');
-      }
-    }
-  };
+  // Removed unused handleDeleteExpense function
 
-  const handleApproveExpense = async (expenseId: string, isApproved: boolean) => {
-    try {
-      await expensesAPI.update(expenseId, { isApproved });
-      setSuccess(`Expense ${isApproved ? 'approved' : 'rejected'} successfully`);
-      refreshData();
-    } catch (error: any) {
-      setError(`Failed to ${isApproved ? 'approve' : 'reject'} expense`);
-    }
-  };
+  // Removed unused handleApproveExpense function
 
   // Tour CRUD handlers
   const handleSaveTour = async () => {
@@ -773,141 +753,7 @@ const PilgrimageAdminDashboard: React.FC = () => {
     </>
   );
 
-  const renderExpensesContent = () => (
-    <Row className="g-4">
-      <Col>
-        <Card className="pilgrimage-table-card">
-          <Card.Header className="pilgrimage-card-header">
-            <h5>Expense Management</h5>
-            <Button 
-              variant="primary" 
-              size="sm"
-              onClick={() => {
-                setExpenseForm({
-                  tour: '',
-                  addedBy: '',
-                  category: 'transportation',
-                  description: '',
-                  amount: 0,
-                  expenseDate: '',
-                  location: { name: '', address: '' },
-                  vendor: { name: '', contact: '', address: '' },
-                  paymentMethod: 'cash' as const,
-                  receiptNumber: '',
-                  isApproved: false,
-                  notes: ''
-                });
-                setEditingExpense(null);
-                setShowExpenseModal(true);
-              }}
-            >
-              <i className="fas fa-plus me-2"></i>Add New Expense
-            </Button>
-          </Card.Header>
-          <Card.Body>
-            <Table responsive className="pilgrimage-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th>Amount</th>
-                  <th>Tour</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.length > 0 ? (
-                  expenses.map((expense) => (
-                    <tr key={expense._id}>
-                      <td>{new Date(expense.expenseDate).toLocaleDateString()}</td>
-                      <td>
-                        <Badge bg="info">{expense.category}</Badge>
-                      </td>
-                      <td>{expense.description}</td>
-                      <td>₹{expense.amount.toLocaleString()}</td>
-                      <td>
-                        {typeof expense.tour === 'object' && expense.tour ? 
-                          expense.tour.title : 
-                          'General'
-                        }
-                      </td>
-                      <td>
-                        <Badge 
-                          bg={expense.isApproved ? 'success' : 'warning'}
-                        >
-                          {expense.isApproved ? 'Approved' : 'Pending'}
-                        </Badge>
-                      </td>
-                      <td>
-                        {!expense.isApproved && (
-                          <Button 
-                            size="sm" 
-                            variant="outline-success" 
-                            className="me-1"
-                            onClick={() => handleApproveExpense(expense._id, true)}
-                            title="Approve"
-                          >
-                            <i className="fas fa-check"></i>
-                          </Button>
-                        )}
-                        <Button 
-                          size="sm" 
-                          variant="outline-primary" 
-                          className="me-1"
-                          onClick={() => {
-                            setEditingExpense(expense);
-                            setExpenseForm({
-                              tour: typeof expense.tour === 'object' ? expense.tour._id : expense.tour,
-                              addedBy: expense.addedBy || '',
-                              category: expense.category,
-                              description: expense.description,
-                              amount: expense.amount,
-                              expenseDate: expense.expenseDate,
-                              location: expense.location || { name: '', address: '' },
-                              vendor: {
-                                name: expense.vendor?.name || '',
-                                contact: expense.vendor?.contact || '',
-                                address: expense.vendor?.address || ''
-                              },
-                              paymentMethod: expense.paymentMethod || 'cash',
-                              receiptNumber: expense.receiptNumber || '',
-                              isApproved: expense.isApproved,
-                              notes: expense.notes || ''
-                            });
-                            setShowExpenseModal(true);
-                          }}
-                          title="Edit"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline-danger"
-                          onClick={() => handleDeleteExpense(expense._id)}
-                          title="Delete"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="text-center text-muted py-4">
-                      <i className="fas fa-wallet fa-2x mb-2 d-block"></i>
-                      No expenses found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      </Col>
-    </Row>
-  );
+  // Removed unused renderExpensesContent function
 
   const renderToursContent = () => (
     <Row className="g-4">
