@@ -329,24 +329,18 @@ const ExpensesPage: React.FC = () => {
   return (
     <div className="expensesContainer">
       <Container fluid>
-        <div className="pageHeader">
-          <Row className="align-items-center">
-            <Col>
-              <p className="pageSubtitle">Track and manage tour expenses across all categories</p>
-            </Col>
-            <Col xs="auto">
-              <Button 
-                className="addButton"
-                onClick={() => {
-                  resetExpenseForm()
-                  setShowExpenseModal(true)
-                }}
-              >
-                <i className="fas fa-plus me-2"></i>
-                Add Expense
-              </Button>
-            </Col>
-          </Row>
+        <div className="subHeader mb-3 d-flex justify-content-between align-items-center">
+          <h4 className="subHeaderTitle">Expenses</h4>
+          <Button 
+            className="addButton"
+            onClick={() => {
+              resetExpenseForm()
+              setShowExpenseModal(true)
+            }}
+          >
+            <i className="fas fa-plus me-2"></i>
+            Add Expense
+          </Button>
         </div>
 
         {error && (
