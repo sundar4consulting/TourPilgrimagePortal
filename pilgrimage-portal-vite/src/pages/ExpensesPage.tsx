@@ -65,12 +65,17 @@ const ExpensesPage: React.FC = () => {
   })
 
   const expenseCategories = [
-    { value: 'accommodation', label: 'Accommodation', icon: '🏨' },
-    { value: 'transportation', label: 'Transportation', icon: '🚌' },
-    { value: 'food', label: 'Food & Meals', icon: '🍽️' },
-    { value: 'activities', label: 'Activities', icon: '🎯' },
-    { value: 'guides', label: 'Guides & Services', icon: '👨‍🏫' },
-    { value: 'miscellaneous', label: 'Miscellaneous', icon: '📝' }
+  { value: 'transportation', label: 'Transportation', icon: '🚌' },
+  { value: 'accommodation', label: 'Accommodation', icon: '🏨' },
+  { value: 'meals', label: 'Meals', icon: '🍽️' },
+  { value: 'temple-donations', label: 'Temple Donations', icon: '�' },
+  { value: 'guide-fees', label: 'Guide Fees', icon: '👨‍�' },
+  { value: 'entrance-fees', label: 'Entrance Fees', icon: '�' },
+  { value: 'photography', label: 'Photography', icon: '📷' },
+  { value: 'shopping', label: 'Shopping', icon: '🛍️' },
+  { value: 'medical', label: 'Medical', icon: '🏥' },
+  { value: 'emergency', label: 'Emergency', icon: '�' },
+  { value: 'miscellaneous', label: 'Miscellaneous', icon: '📝' }
   ]
 
   const paymentMethods = [
@@ -95,50 +100,50 @@ const ExpensesPage: React.FC = () => {
       setError(null)
       
       const [expensesResponse, toursResponse] = await Promise.all([
-        expensesAPI.getAll().catch(() => ({ data: [] })),
+        expensesAPI.getAll().catch(() => ({ data: { expenses: [] } })),
         toursAPI.getAll({ limit: 100 }).catch(() => ({ data: { tours: [] } }))
       ])
 
-      if (Array.isArray(expensesResponse.data)) {
-        let filteredExpenses = expensesResponse.data
+      // Support both array and object with expenses key
+      const expensesArray = Array.isArray(expensesResponse.data)
+        ? expensesResponse.data
+        : expensesResponse.data.expenses || [];
 
-        // Apply filters
-        if (filters.category) {
-          filteredExpenses = filteredExpenses.filter(e => e.category === filters.category)
-        }
-        if (filters.tourId) {
-          filteredExpenses = filteredExpenses.filter(e => 
-            typeof e.tour === 'object' ? e.tour._id === filters.tourId : e.tour === filters.tourId
-          )
-        }
-        if (filters.paymentMethod) {
-          filteredExpenses = filteredExpenses.filter(e => e.paymentMethod === filters.paymentMethod)
-        }
-        if (filters.isApproved !== undefined) {
-          filteredExpenses = filteredExpenses.filter(e => e.isApproved === filters.isApproved)
-        }
-        if (filters.minAmount) {
-          filteredExpenses = filteredExpenses.filter(e => e.amount >= parseFloat(filters.minAmount))
-        }
-        if (filters.maxAmount) {
-          filteredExpenses = filteredExpenses.filter(e => e.amount <= parseFloat(filters.maxAmount))
-        }
-        if (filters.dateFrom) {
-          filteredExpenses = filteredExpenses.filter(e => 
-            e.expenseDate && new Date(e.expenseDate) >= new Date(filters.dateFrom)
-          )
-        }
-        if (filters.dateTo) {
-          filteredExpenses = filteredExpenses.filter(e => 
-            e.expenseDate && new Date(e.expenseDate) <= new Date(filters.dateTo)
-          )
-        }
+      let filteredExpenses = expensesArray;
 
-        setExpenses(filteredExpenses)
-      } else {
-        setExpenses([])
+      // Apply filters
+      if (filters.category) {
+        filteredExpenses = filteredExpenses.filter(e => e.category === filters.category)
+      }
+      if (filters.tourId) {
+        filteredExpenses = filteredExpenses.filter(e => 
+          typeof e.tour === 'object' ? e.tour._id === filters.tourId : e.tour === filters.tourId
+        )
+      }
+      if (filters.paymentMethod) {
+        filteredExpenses = filteredExpenses.filter(e => e.paymentMethod === filters.paymentMethod)
+      }
+      if (filters.isApproved !== undefined) {
+        filteredExpenses = filteredExpenses.filter(e => e.isApproved === filters.isApproved)
+      }
+      if (filters.minAmount) {
+        filteredExpenses = filteredExpenses.filter(e => e.amount >= parseFloat(filters.minAmount))
+      }
+      if (filters.maxAmount) {
+        filteredExpenses = filteredExpenses.filter(e => e.amount <= parseFloat(filters.maxAmount))
+      }
+      if (filters.dateFrom) {
+        filteredExpenses = filteredExpenses.filter(e => 
+          e.expenseDate && new Date(e.expenseDate) >= new Date(filters.dateFrom)
+        )
+      }
+      if (filters.dateTo) {
+        filteredExpenses = filteredExpenses.filter(e => 
+          e.expenseDate && new Date(e.expenseDate) <= new Date(filters.dateTo)
+        )
       }
 
+      setExpenses(filteredExpenses)
       setTours(toursResponse.data.tours || [])
     } catch (error: any) {
       console.error('Error fetching data:', error)
@@ -571,7 +576,7 @@ const ExpensesPage: React.FC = () => {
                           </td>
                           <td>
                             {expense.tour && typeof expense.tour === 'object' ? (
-                              <small>{expense.tour.title}</small>
+                              <small>{expense.tour.title || expense.tour._id || 'Untitled Tour'}</small>
                             ) : (
                               <Badge bg="light" text="dark">No tour</Badge>
                             )}
