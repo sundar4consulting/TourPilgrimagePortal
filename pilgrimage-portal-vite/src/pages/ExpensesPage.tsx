@@ -483,44 +483,6 @@ const ExpensesPage: React.FC = () => {
             </div>
 
             {/* Summary Cards */}
-            <Row className="mb-4">
-              <Col md={3}>
-                <Card className="enhancedCard text-center">
-                  <Card.Body>
-                    <h5 className="cardTitle">Total Expenses</h5>
-                    <h3 className="text-primary">₹{totalExpenses.toLocaleString()}</h3>
-                    <small className="text-muted">{expenses.length} entries</small>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3}>
-                <Card className="enhancedCard text-center">
-                  <Card.Body>
-                    <h5 className="cardTitle">Approved</h5>
-                    <h3 className="text-success">₹{approvedExpenses.toLocaleString()}</h3>
-                    <small className="text-muted">{expenses.filter(e => e.isApproved).length} entries</small>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3}>
-                <Card className="enhancedCard text-center">
-                  <Card.Body>
-                    <h5 className="cardTitle">Pending</h5>
-                    <h3 className="text-warning">₹{pendingExpenses.toLocaleString()}</h3>
-                    <small className="text-muted">{expenses.filter(e => !e.isApproved).length} entries</small>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={3}>
-                <Card className="enhancedCard text-center">
-                  <Card.Body>
-                    <h5 className="cardTitle">Active Tours</h5>
-                    <h3 className="text-info">{tours.length}</h3>
-                    <small className="text-muted">available tours</small>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
 
             {/* Expenses Table */}
             <Card className="enhancedCard">
