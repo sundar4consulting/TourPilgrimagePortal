@@ -308,7 +308,6 @@ const ExpensesPage: React.FC = () => {
   // Calculate statistics
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
   const approvedExpenses = expenses.filter(e => e.isApproved).reduce((sum, expense) => sum + expense.amount, 0)
-  const pendingExpenses = expenses.filter(e => !e.isApproved).reduce((sum, expense) => sum + expense.amount, 0)
   const expensesByCategory = expenseCategories.map(cat => ({
     ...cat,
     count: expenses.filter(e => e.category === cat.value).length,
