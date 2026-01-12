@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-// Use relative URL since Vite proxy will handle routing to backend
-const API_BASE_URL = 'https://tourpilgrimageportal.onrender.com/api'
+// Use local backend server for development
+const API_BASE_URL = 'http://localhost:5000/api'
 
 
 

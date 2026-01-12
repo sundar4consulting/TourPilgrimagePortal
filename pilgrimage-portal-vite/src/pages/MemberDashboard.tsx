@@ -12,12 +12,12 @@ import {
   Modal,
   Form,
   Alert,
-  Spinner,
-  ListGroup
+  Spinner
 } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../services/AuthContext'
 import { bookingsAPI, familyAPI, Booking, FamilyMember } from '../services/api'
+import './MemberDashboard.css'
 
 const MemberDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('bookings')
@@ -143,6 +143,63 @@ const MemberDashboard: React.FC = () => {
     }
   }
 
+  const getInitials = (value?: string) => {
+    if (!value) return 'YY'
+    return value
+      .split(' ')
+      .filter(Boolean)
+      .map((part) => part[0]?.toUpperCase())
+      .slice(0, 2)
+      .join('')
+  }
+
+  const activeBookingsCount = bookings.filter((b) => b.status !== 'cancelled').length
+  const confirmedBookingsCount = bookings.filter((b) => b.status === 'confirmed').length
+  const latestBooking = bookings.length
+    ? [...bookings].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )[0]
+    : null
+  const latestBookingLabel = latestBooking
+    ? `${new Date(latestBooking.createdAt).toLocaleDateString()} · ${
+        typeof latestBooking.tour === 'object'
+          ? latestBooking.tour?.title || 'Pilgrimage'
+          : 'Pilgrimage'
+      }`
+    : 'No journeys booked yet'
+  const totalPilgrims = bookings.reduce((sum, booking) => {
+    const participantCount = booking.totalParticipants ?? booking.participants?.length ?? 0
+    return sum + participantCount
+  }, 0)
+  const membershipId = user?.id ? `#${user.id.slice(-6).toUpperCase()}` : '#PILGRIM'
+  const maskedPhone = user?.phone || 'Add your phone number'
+  const maskedAadhar = user?.aadhar ? `•••• ${user.aadhar.slice(-4)}` : 'Add Aadhar for faster bookings'
+  const userInitials = getInitials(user?.name || user?.email)
+  const profileDetailItems = [
+    { label: 'Full Name', value: user?.name || 'Not provided' },
+    { label: 'Email Address', value: user?.email || 'Not provided' },
+    { label: 'Contact Number', value: maskedPhone },
+    { label: 'Membership Role', value: user?.role?.toUpperCase() || 'MEMBER' },
+    { label: 'Aadhar Number', value: maskedAadhar },
+    { label: 'Unique ID', value: membershipId }
+  ]
+  const profileTimeline = [
+    {
+      title: 'Account Status',
+      description: confirmedBookingsCount
+        ? 'Active traveler with confirmed journeys'
+        : 'Ready to plan your first pilgrimage'
+    },
+    {
+      title: 'Preferred Contact',
+      description: user?.phone || user?.email || 'Add contact details'
+    },
+    {
+      title: 'Latest Booking',
+      description: latestBookingLabel
+    }
+  ]
+
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -155,27 +212,38 @@ const MemberDashboard: React.FC = () => {
   }
 
   return (
-    <>
-      <Container className="py-5">
+    <div className="memberDashboard">
+      <Container fluid className="memberDashboardContainer py-5">
         {/* Welcome Section */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h1 className="display-6 fw-bold text-primary">
-                  Welcome, {user?.name}!
-                </h1>
-                <p className="text-muted">Manage your pilgrimage bookings and family details</p>
-              </div>
-              <Button 
-                variant="primary"
-                onClick={() => navigate('/tours')}
-              >
-                Browse Tours
-              </Button>
-            </div>
-          </Col>
-        </Row>
+        <div className="memberWelcomeCard mb-4">
+          <div>
+            <p className="memberWelcomeEyebrow">Pilgrimage companion</p>
+            <h1 className="memberWelcomeTitle">
+              Welcome, {user?.name || 'Member'}!
+            </h1>
+            <p className="memberWelcomeSubtitle">
+              Manage your journeys, bookings, and pilgrim family with the refreshed dashboard experience.
+            </p>
+          </div>
+          <div className="memberWelcomeActions">
+            <Button 
+              variant="light"
+              className="memberPrimaryAction"
+              onClick={() => navigate('/tours')}
+            >
+              <i className="fas fa-compass me-2"></i>
+              Browse Tours
+            </Button>
+            <Button 
+              variant="outline-light"
+              className="memberSecondaryAction"
+              onClick={() => setActiveTab('profile')}
+            >
+              <i className="fas fa-user-circle me-2"></i>
+              View Profile
+            </Button>
+          </div>
+        </div>
 
         {error && (
           <Alert variant="danger" className="mb-4">
@@ -184,286 +252,439 @@ const MemberDashboard: React.FC = () => {
         )}
 
         {/* Dashboard Stats */}
-        <Row className="mb-4">
-          <Col md={4}>
-            <Card className="border-primary">
-              <Card.Body className="text-center">
-                <div className="text-primary mb-2">
-                  <i className="fas fa-calendar-check fa-2x"></i>
-                </div>
-                <h4 className="text-primary">{bookings.filter(b => b.status !== 'cancelled').length}</h4>
-                <p className="text-muted mb-0">Active Bookings</p>
-              </Card.Body>
-            </Card>
-          </Col>
-          
-          <Col md={4}>
-            <Card className="border-success">
-              <Card.Body className="text-center">
-                <div className="text-success mb-2">
-                  <i className="fas fa-users fa-2x"></i>
-                </div>
-                <h4 className="text-success">{familyMembers.length + 1}</h4>
-                <p className="text-muted mb-0">Family Members</p>
-              </Card.Body>
-            </Card>
-          </Col>
-          
-          <Col md={4}>
-            <Card className="border-info">
-              <Card.Body className="text-center">
-                <div className="text-info mb-2">
-                  <i className="fas fa-route fa-2x"></i>
-                </div>
-                <h4 className="text-info">{bookings.filter(b => b.status === 'confirmed').length}</h4>
-                <p className="text-muted mb-0">Confirmed Tours</p>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        <div className="memberStatsGrid mb-4">
+          <div className="memberStatCard">
+            <div className="memberStatIcon primary">
+              <i className="fas fa-calendar-check"></i>
+            </div>
+            <p className="label">Active Bookings</p>
+            <h3>{activeBookingsCount}</h3>
+            <small>Journeys currently planned</small>
+          </div>
+
+          <div className="memberStatCard">
+            <div className="memberStatIcon success">
+              <i className="fas fa-users"></i>
+            </div>
+            <p className="label">Family Members</p>
+            <h3>{familyMembers.length + 1}</h3>
+            <small>Travellers linked to your account</small>
+          </div>
+
+          <div className="memberStatCard">
+            <div className="memberStatIcon info">
+              <i className="fas fa-route"></i>
+            </div>
+            <p className="label">Confirmed Tours</p>
+            <h3>{confirmedBookingsCount}</h3>
+            <small>Awaiting departure</small>
+          </div>
+
+          <div className="memberStatCard">
+            <div className="memberStatIcon warning">
+              <i className="fas fa-people-carry"></i>
+            </div>
+            <p className="label">Total Pilgrims</p>
+            <h3>{Math.max(totalPilgrims, 1)}</h3>
+            <small>Participants across bookings</small>
+          </div>
+        </div>
 
         {/* Main Content Tabs */}
         <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'bookings')}>
-          <Card>
-            <Card.Header>
-              <Nav variant="tabs" className="card-header-tabs">
+          <Card className="memberTabCard">
+            <Card.Header className="memberTabsHeader">
+              <Nav variant="tabs" className="memberTabs">
                 <Nav.Item>
-                  <Nav.Link eventKey="bookings">My Bookings</Nav.Link>
+                  <Nav.Link eventKey="bookings">
+                    <i className="fas fa-calendar-alt me-2"></i>
+                    My Bookings
+                  </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="book-tour">Book A Tour</Nav.Link>
+                  <Nav.Link eventKey="book-tour">
+                    <i className="fas fa-mountain me-2"></i>
+                    Book A Tour
+                  </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="family">Family Members</Nav.Link>
+                  <Nav.Link eventKey="family">
+                    <i className="fas fa-users me-2"></i>
+                    Family Members
+                  </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link eventKey="profile">Profile</Nav.Link>
+                  <Nav.Link eventKey="profile">
+                    <i className="fas fa-id-card me-2"></i>
+                    Profile
+                  </Nav.Link>
                 </Nav.Item>
               </Nav>
             </Card.Header>
             
-            <Card.Body>
+            <Card.Body className="memberTabBody">
               <Tab.Content>
                 {/* Bookings Tab */}
                 <Tab.Pane eventKey="bookings">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5 className="mb-0">Your Tour Bookings</h5>
-                    <Button 
-                      variant="outline-primary"
-                      onClick={() => navigate('/tours')}
-                    >
-                      Book New Tour
-                    </Button>
+                  <div className="memberSectionHeader">
+                    <div>
+                      <p className="sectionEyebrow">Journey Planner</p>
+                      <h5 className="mb-0">Your Tour Bookings</h5>
+                    </div>
+                    <div className="memberSectionActions">
+                      <Button 
+                        variant="outline-primary"
+                        className="memberGhostButton"
+                        onClick={() => setActiveTab('family')}
+                      >
+                        <i className="fas fa-user-friends me-2"></i>
+                        Manage Family
+                      </Button>
+                      <Button 
+                        variant="primary"
+                        className="memberAccentButton"
+                        onClick={() => navigate('/tours')}
+                      >
+                        <i className="fas fa-plus me-2"></i>
+                        Book New Tour
+                      </Button>
+                    </div>
                   </div>
                   
                   {bookings.length === 0 ? (
-                    <div className="text-center py-5">
-                      <i className="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
-                      <h5>No Bookings Yet</h5>
-                      <p className="text-muted">Start your spiritual journey by booking a tour</p>
+                    <div className="memberEmptyState">
+                      <div className="iconCircle">
+                        <i className="fas fa-calendar-plus"></i>
+                      </div>
+                      <h5>No bookings yet</h5>
+                      <p>Start your spiritual journey by booking a curated pilgrimage.</p>
                       <Button 
                         variant="primary"
                         onClick={() => navigate('/tours')}
                       >
-                        Browse Tours
+                        Explore Tours
                       </Button>
                     </div>
                   ) : (
-                    <div className="table-responsive">
-                      <Table hover>
-                        <thead>
-                          <tr>
-                            <th>Tour</th>
-                            <th>Date</th>
-                            <th>Participants</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {bookings.map((booking) => {
-                            const tour = typeof booking.tour === 'object' ? booking.tour : null;
-                            return (
-                            <tr key={booking._id}>
-                              <td>
-                                <strong>{tour?.title || 'Unknown Tour'}</strong>
-                                <br />
-                                <small className="text-muted">
-                                  {tour?.duration ? `${tour.duration.days}D/${tour.duration.nights}N` : 'Duration N/A'}
-                                </small>
-                              </td>
-                              <td>
-                                <small>
-                                  {new Date(booking.createdAt).toLocaleDateString()}
-                                </small>
-                              </td>
-                              <td>{booking.participants.length}</td>
-                              <td className="fw-bold">₹{booking.pricing?.total?.toLocaleString() || 'N/A'}</td>
-                              <td>{getStatusBadge(booking.status)}</td>
-                              <td>
-                                <div className="d-flex gap-1">
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline-primary"
-                                    onClick={() => navigate(`/tours/${typeof booking.tour === 'string' ? booking.tour : booking.tour?._id}`)}
-                                  >
-                                    View
-                                  </Button>
-                                  {(booking.status === 'interested' || booking.status === 'confirmed') && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline-danger"
-                                      onClick={() => handleCancelBooking(booking._id)}
-                                    >
-                                      Cancel
-                                    </Button>
-                                  )}
-                                </div>
-                              </td>
+                    <Card className="memberSectionCard">
+                      <div className="table-responsive memberTableWrapper">
+                        <Table hover className="memberTable">
+                          <thead>
+                            <tr>
+                              <th>Tour</th>
+                              <th>Date</th>
+                              <th>Participants</th>
+                              <th>Amount</th>
+                              <th>Status</th>
+                              <th>Actions</th>
                             </tr>
-                            );
-                          })}
-                        </tbody>
-                      </Table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {bookings.map((booking) => {
+                              const tour = typeof booking.tour === 'object' ? booking.tour : null;
+                              return (
+                                <tr key={booking._id}>
+                                  <td>
+                                    <strong>{tour?.title || 'Unknown Tour'}</strong>
+                                    <br />
+                                    <small className="text-muted">
+                                      {tour?.duration ? `${tour.duration.days}D/${tour.duration.nights}N` : 'Duration N/A'}
+                                    </small>
+                                  </td>
+                                  <td>
+                                    <small>
+                                      {new Date(booking.createdAt).toLocaleDateString()}
+                                    </small>
+                                  </td>
+                                  <td>{booking.participants.length}</td>
+                                  <td className="fw-bold">₹{booking.pricing?.total?.toLocaleString() || 'N/A'}</td>
+                                  <td>{getStatusBadge(booking.status)}</td>
+                                  <td>
+                                    <div className="memberBookingActions">
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline-primary"
+                                        onClick={() => navigate(`/tours/${typeof booking.tour === 'string' ? booking.tour : booking.tour?._id}`)}
+                                      >
+                                        View
+                                      </Button>
+                                      {(booking.status === 'interested' || booking.status === 'confirmed') && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline-danger"
+                                          onClick={() => handleCancelBooking(booking._id)}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </Table>
+                      </div>
+                    </Card>
                   )}
                 </Tab.Pane>
 
                 {/* Book A Tour Tab */}
                 <Tab.Pane eventKey="book-tour">
-                  <div className="text-center py-5">
-                    <i className="fas fa-mountain fa-4x text-primary mb-3"></i>
-                    <h4 className="text-primary">Discover Spiritual Journeys</h4>
-                    <p className="text-muted mb-4">
-                      Explore our curated pilgrimage tours and book your next spiritual adventure.
+                  <div className="memberBookTourPanel memberSectionCard text-center">
+                    <div className="iconAura">
+                      <i className="fas fa-mountain"></i>
+                    </div>
+                    <h4>Discover Spiritual Journeys</h4>
+                    <p>
+                      Explore curated circuits, temple trails, and festival tours designed for every devotee.
                     </p>
-                    <Button 
-                      variant="primary"
-                      size="lg"
-                      onClick={() => navigate('/member/book-tour')}
-                    >
-                      <i className="fas fa-search me-2"></i>
-                      Browse & Book Tours
-                    </Button>
+                    <div className="memberBookTourActions">
+                      <Button 
+                        variant="primary"
+                        size="lg"
+                        onClick={() => navigate('/member/book-tour')}
+                      >
+                        <i className="fas fa-search me-2"></i>
+                        Browse & Book Tours
+                      </Button>
+                      <Button 
+                        variant="outline-primary"
+                        size="lg"
+                        onClick={() => navigate('/tours')}
+                      >
+                        <i className="fas fa-th-large me-2"></i>
+                        View All Tours
+                      </Button>
+                    </div>
                   </div>
                 </Tab.Pane>
 
                 {/* Family Members Tab */}
                 <Tab.Pane eventKey="family">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5 className="mb-0">Family Members</h5>
+                  <div className="memberSectionHeader">
+                    <div>
+                      <p className="sectionEyebrow">Pilgrim Circle</p>
+                      <h5 className="mb-0">Family Members</h5>
+                    </div>
                     <Button 
                       variant="primary"
+                      className="memberAccentButton"
                       onClick={() => {
                         setEditingMember(null)
                         setMemberForm({ name: '', age: '', aadharNumber: '', relationship: '' })
                         setShowFamilyModal(true)
                       }}
                     >
+                      <i className="fas fa-user-plus me-2"></i>
                       Add Family Member
                     </Button>
                   </div>
                   
-                  <Row>
-                    {/* Primary User Card */}
-                    <Col md={6} lg={4} className="mb-3">
-                      <Card className="border-primary">
-                        <Card.Body>
-                          <div className="d-flex align-items-center">
-                            <div className="text-primary me-3">
-                              <i className="fas fa-user-circle fa-2x"></i>
-                            </div>
-                            <div>
-                              <h6 className="mb-1">{user?.name}</h6>
-                              <small className="text-muted">Primary Member</small>
-                              <br />
-                              <small className="text-muted">{user?.email}</small>
-                            </div>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                    
-                    {/* Family Members */}
+                  <div className="memberFamilyGrid">
+                    <div className="memberFamilyCard primary">
+                      <div className="memberFamilyAvatar">
+                        <i className="fas fa-user-circle"></i>
+                      </div>
+                      <div>
+                        <p className="label">Primary Member</p>
+                        <h6>{user?.name || 'Member'}</h6>
+                        <small>{user?.email}</small>
+                      </div>
+                    </div>
+
                     {familyMembers.map((member) => (
-                      <Col md={6} lg={4} key={member._id} className="mb-3">
-                        <Card>
-                          <Card.Body>
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div>
-                                <h6 className="mb-1">{member.name}</h6>
-                                <small className="text-muted">{member.relation}</small>
-                                <br />
-                                <small className="text-muted">Age: {member.age}</small>
-                                <br />
-                                <small className="text-muted">Aadhar: ****{member.aadhar.slice(-4)}</small>
-                              </div>
-                              <div className="d-flex flex-column gap-1">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline-primary"
-                                  onClick={() => handleEditMember(member)}
-                                >
-                                  <i className="fas fa-edit"></i>
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline-danger"
-                                  onClick={() => handleDeleteMember(member._id!)}
-                                >
-                                  <i className="fas fa-trash"></i>
-                                </Button>
-                              </div>
-                            </div>
-                          </Card.Body>
-                        </Card>
-                      </Col>
+                      <div key={member._id} className="memberFamilyCard">
+                        <div>
+                          <p className="label text-capitalize">{member.relation}</p>
+                          <h6>{member.name}</h6>
+                        </div>
+                        <div className="memberFamilyMeta">
+                          <span>Age {member.age}</span>
+                          <span>Aadhar ••••{member.aadhar.slice(-4)}</span>
+                        </div>
+                        <div className="memberFamilyActions">
+                          <Button 
+                            size="sm" 
+                            variant="outline-primary"
+                            onClick={() => handleEditMember(member)}
+                          >
+                            Edit
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline-danger"
+                            onClick={() => handleDeleteMember(member._id!)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
                     ))}
-                  </Row>
+                  </div>
                   
                   {familyMembers.length === 0 && (
-                    <div className="text-center py-4">
-                      <i className="fas fa-users fa-3x text-muted mb-3"></i>
-                      <h6>No Family Members Added</h6>
-                      <p className="text-muted">Add family members to book tours together</p>
+                    <div className="memberEmptyState">
+                      <div className="iconCircle">
+                        <i className="fas fa-users"></i>
+                      </div>
+                      <h5>No family members added</h5>
+                      <p>Add family members to share bookings and manage pilgrim details.</p>
                     </div>
                   )}
                 </Tab.Pane>
 
                 {/* Profile Tab */}
-                <Tab.Pane eventKey="profile">
-                  <Row>
-                    <Col md={6}>
-                      <Card>
-                        <Card.Header>
-                          <h6 className="mb-0">Profile Information</h6>
-                        </Card.Header>
+                <Tab.Pane eventKey="profile" className="profileTab">
+                  <div className="profileHeroCard">
+                    <div className="profileHeroContent">
+                      <div className="profileAvatar">{userInitials}</div>
+                      <div>
+                        <p className="profileGreeting">Member Identity</p>
+                        <h3 className="text-white mb-1">{user?.name || 'Member'}</h3>
+                        <p className="mb-0 text-white-50">{membershipId}</p>
+                      </div>
+                    </div>
+                    <div className="profileHeroMeta">
+                      <span className="profileChip">
+                        {user?.role === 'admin' ? 'Administrator Access' : 'Member Access'}
+                      </span>
+                      <span className="profileChip">{activeBookingsCount} active bookings</span>
+                      <span className="profileChip">{familyMembers.length + 1} linked members</span>
+                    </div>
+                    <div className="profileActions">
+                      <Button variant="light" size="sm" className="profileActionButton">
+                        Update Profile
+                      </Button>
+                      <Button
+                        variant="outline-light"
+                        size="sm"
+                        className="profileActionButton"
+                        onClick={() => setActiveTab('family')}
+                      >
+                        Manage Family
+                      </Button>
+                      <Button
+                        variant="outline-light"
+                        size="sm"
+                        className="profileActionButton"
+                        onClick={() => setActiveTab('bookings')}
+                      >
+                        View Bookings
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Row className="gy-4 profileContent">
+                    <Col lg={8}>
+                      <Card className="profileInfoCard">
                         <Card.Body>
-                          <ListGroup variant="flush">
-                            <ListGroup.Item className="d-flex justify-content-between">
-                              <strong>Name:</strong>
-                              <span>{user?.name}</span>
-                            </ListGroup.Item>
-                            <ListGroup.Item className="d-flex justify-content-between">
-                              <strong>Email:</strong>
-                              <span>{user?.email}</span>
-                            </ListGroup.Item>
-                            <ListGroup.Item className="d-flex justify-content-between">
-                              <strong>Role:</strong>
-                              <Badge bg="primary">{user?.role}</Badge>
-                            </ListGroup.Item>
-                            <ListGroup.Item className="d-flex justify-content-between">
-                              <strong>Phone:</strong>
-                              <span>{user?.phone || 'Not provided'}</span>
-                            </ListGroup.Item>
-                          </ListGroup>
-                          
-                          <div className="mt-3">
-                            <Button variant="outline-primary" size="sm">
-                              Edit Profile
-                            </Button>
+                          <div className="profileSectionHeader">
+                            <div>
+                              <p className="sectionEyebrow">Personal Details</p>
+                              <h5 className="mb-0">Account & Identity</h5>
+                            </div>
+                            <Badge bg="success" className="profileStatusBadge">
+                              Verified Member
+                            </Badge>
                           </div>
+
+                          <div className="profileDetailsGrid">
+                            {profileDetailItems.map((detail) => (
+                              <div key={detail.label} className="profileDetailItem">
+                                <span className="label">{detail.label}</span>
+                                <p className="value">{detail.value}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </Card.Body>
+                      </Card>
+
+                      <Card className="profileInfoCard">
+                        <Card.Body>
+                          <div className="profileSectionHeader">
+                            <div>
+                              <p className="sectionEyebrow">Journey Snapshot</p>
+                              <h5 className="mb-0">Pilgrimage Insights</h5>
+                            </div>
+                            <span className="profileChip">Real-time metrics</span>
+                          </div>
+
+                          <div className="profileStatsGrid">
+                            <div className="profileStatCard">
+                              <span className="label">Active Bookings</span>
+                              <h3>{activeBookingsCount}</h3>
+                              <small>Currently planned journeys</small>
+                            </div>
+                            <div className="profileStatCard">
+                              <span className="label">Family Members</span>
+                              <h3>{familyMembers.length + 1}</h3>
+                              <small>Linked travellers</small>
+                            </div>
+                            <div className="profileStatCard">
+                              <span className="label">Total Pilgrims</span>
+                              <h3>{Math.max(totalPilgrims, 1)}</h3>
+                              <small>Across all bookings</small>
+                            </div>
+                            <div className="profileStatCard">
+                              <span className="label">Confirmed Tours</span>
+                              <h3>{confirmedBookingsCount}</h3>
+                              <small>Awaiting departure</small>
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+
+                    <Col lg={4}>
+                      <Card className="profileInfoCard">
+                        <Card.Body>
+                          <div className="profileSectionHeader">
+                            <div>
+                              <p className="sectionEyebrow">Contact Preferences</p>
+                              <h5 className="mb-0">Stay Connected</h5>
+                            </div>
+                          </div>
+                          <ul className="profileContactList">
+                            <li>
+                              <span>Email</span>
+                              <span>{user?.email || 'Not provided'}</span>
+                            </li>
+                            <li>
+                              <span>Phone</span>
+                              <span>{maskedPhone}</span>
+                            </li>
+                            <li>
+                              <span>Notifications</span>
+                              <span>App & Email</span>
+                            </li>
+                            <li>
+                              <span>Latest Booking</span>
+                              <span>{latestBooking ? new Date(latestBooking.createdAt).toLocaleDateString() : 'None'}</span>
+                            </li>
+                          </ul>
+                        </Card.Body>
+                      </Card>
+
+                      <Card className="profileInfoCard profileTimelineCard mt-4">
+                        <Card.Body>
+                          <div className="profileSectionHeader">
+                            <div>
+                              <p className="sectionEyebrow text-white-50">Journey Timeline</p>
+                              <h5 className="mb-0 text-white">Recent Highlights</h5>
+                            </div>
+                          </div>
+                          <ul className="profileTimeline">
+                            {profileTimeline.map((item) => (
+                              <li key={item.title} className="profileTimelineItem">
+                                <span className="timelineDot" />
+                                <div>
+                                  <p className="timelineLabel">{item.title}</p>
+                                  <p className="timelineValue">{item.description}</p>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
                         </Card.Body>
                       </Card>
                     </Col>
@@ -561,7 +782,7 @@ const MemberDashboard: React.FC = () => {
           </Modal.Footer>
         </Form>
       </Modal>
-    </>
+    </div>
   )
 }
 

@@ -1,0 +1,671 @@
+.memberDashboard {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #e0ecff, #f5f7ff 45%, #fefefe 100%);
+  padding: 2rem 0;
+}
+
+.memberDashboardContainer {
+  max-width: 1200px;
+}
+
+.memberWelcomeCard {
+  background: linear-gradient(120deg, #2563eb, #7c3aed);
+  border-radius: 28px;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  color: #fff;
+  box-shadow: 0 30px 60px rgba(37, 99, 235, 0.35);
+}
+
+.memberWelcomeEyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.4rem;
+}
+
+.memberWelcomeTitle {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.memberWelcomeSubtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 480px;
+}
+
+.memberWelcomeActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.memberPrimaryAction,
+.memberSecondaryAction {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.55rem 1.5rem;
+}
+
+.memberSecondaryAction {
+  border-width: 2px;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.memberStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.memberStatCard {
+  border-radius: 24px;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.07);
+}
+
+.memberStatCard .label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.memberStatCard h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0.4rem;
+}
+
+.memberStatCard small {
+  color: #475569;
+}
+
+.memberStatIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.memberStatIcon.primary {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.memberStatIcon.success {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.memberStatIcon.info {
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+}
+
+.memberStatIcon.warning {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+}
+
+.memberTabCard {
+  border: none;
+  border-radius: 28px;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.memberTabsHeader {
+  background: radial-gradient(circle at top left, #4f46e5, #1e3a8a);
+  padding: 1rem;
+}
+
+.memberTabs .nav-link {
+  border: none;
+  border-radius: 16px;
+  margin: 0 0.35rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  padding: 0.65rem 1.35rem;
+  transition: all 0.3s ease;
+}
+
+.memberTabs .nav-link:hover {
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.memberTabs .nav-link.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.memberTabBody {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
+  padding: 2rem;
+}
+
+.memberSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.memberSectionActions,
+.memberBookTourActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.memberGhostButton {
+  border-radius: 999px;
+}
+
+.memberAccentButton {
+  border-radius: 999px;
+  padding-inline: 1.35rem;
+  font-weight: 600;
+}
+
+.memberSectionCard {
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  padding: 1.25rem;
+}
+
+.memberTableWrapper {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.memberTable thead {
+  background: linear-gradient(135deg, #312e81, #1d4ed8);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.memberTable th,
+.memberTable td {
+  border: none;
+  vertical-align: middle;
+}
+
+.memberTable tbody tr {
+  transition: all 0.2s ease;
+}
+
+.memberTable tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.memberBookingActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.memberEmptyState {
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: linear-gradient(180deg, #f5f3ff, #eef2ff);
+  border: 1px dashed rgba(99, 102, 241, 0.35);
+}
+
+.memberEmptyState .iconCircle {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.memberBookTourPanel {
+  text-align: center;
+  background: linear-gradient(135deg, #fef3c7, #fdf2f8);
+}
+
+.memberBookTourPanel h4 {
+  font-weight: 700;
+  margin-top: 1rem;
+}
+
+.memberBookTourPanel p {
+  color: #7c2d12;
+  max-width: 520px;
+  margin: 0.75rem auto 1.5rem;
+}
+
+.iconAura {
+  width: 90px;
+  height: 90px;
+  border-radius: 24px;
+  margin: 0 auto 1rem;
+  background: rgba(217, 119, 6, 0.2);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: #d97706;
+}
+
+.memberFamilyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.memberFamilyCard {
+  border-radius: 20px;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 15px 30px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.memberFamilyCard.primary {
+  background: linear-gradient(135deg, #ec4899, #f472b6);
+  color: #fff;
+  border: none;
+}
+
+.memberFamilyCard .label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.memberFamilyCard.primary .label,
+.memberFamilyCard.primary small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.memberFamilyCard.primary h6 {
+  color: #fff;
+}
+
+.memberFamilyAvatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  font-size: 1.7rem;
+}
+
+.memberFamilyMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.memberFamilyCard.primary .memberFamilyMeta span {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.memberFamilyActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.memberFamilyActions .btn {
+  flex: 1;
+  border-radius: 999px;
+}
+
+.profileTab {
+.profileTab {
+  background: linear-gradient(135deg, #f5f7ff 0%, #e0f2ff 45%, #eef2ff 100%);
+  border-radius: 24px;
+  padding: 1.5rem;
+}
+
+.profileHeroCard {
+  background: linear-gradient(120deg, #4f46e5, #2563eb);
+  border-radius: 28px;
+  padding: 1.75rem;
+  color: #fff;
+  box-shadow: 0 25px 60px rgba(37, 99, 235, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.profileHeroCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.35), transparent 55%);
+  pointer-events: none;
+}
+
+.profileHeroContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profileAvatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.profileGreeting {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.35rem;
+}
+
+.profileHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profileChip {
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.profileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profileActionButton {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.45rem 1.4rem;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+}
+
+.profileContent {
+  margin-top: 2rem;
+}
+
+.profileInfoCard {
+  border: none;
+  border-radius: 26px;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.profileInfoCard .card-body {
+  padding: 1.75rem;
+}
+
+.profileSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sectionEyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.profileStatusBadge {
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.75rem;
+}
+
+.profileDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.profileDetailItem {
+  border-radius: 18px;
+  border: 1px solid #e3e8ff;
+  padding: 1rem;
+  background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.profileDetailItem .label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.profileDetailItem .value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-top: 0.35rem;
+  word-break: break-word;
+}
+
+.profileStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.profileStatCard {
+  border-radius: 20px;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #e0e7ff 0%, #fce7f3 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+}
+
+.profileStatCard .label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+}
+
+.profileStatCard h3 {
+  margin: 0.35rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.profileStatCard small {
+  color: #475569;
+  font-weight: 500;
+}
+
+.profileContactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.profileContactList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #edf2ff;
+  font-weight: 500;
+  color: #0f172a;
+  gap: 0.75rem;
+}
+
+.profileContactList li:last-child {
+  border-bottom: none;
+}
+
+.profileContactList span:last-child {
+  font-weight: 600;
+  color: #4338ca;
+}
+
+.profileTimelineCard {
+  background: linear-gradient(180deg, #0f172a, #1e3a8a);
+  color: #fff;
+  border: none;
+  box-shadow: 0 35px 60px rgba(15, 23, 42, 0.45);
+}
+
+.profileTimelineCard .card-body {
+  background: transparent;
+}
+
+.profileTimeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.profileTimelineItem {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.profileTimelineItem:last-child {
+  border-bottom: none;
+}
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fbbf24;
+  margin-top: 0.45rem;
+}
+
+.timelineLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 0.15rem;
+}
+
+.timelineValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+@media (max-width: 991px) {
+  .memberWelcomeCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .memberSectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .memberSectionActions,
+  .memberWelcomeActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .memberTabBody {
+    padding: 1.5rem;
+  }
+
+  .profileTab {
+    padding: 1rem;
+  }
+
+  .profileHeroContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profileActions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .memberTabBody {
+    padding: 1rem;
+  }
+
+  .memberStatCard h3 {
+    font-size: 1.8rem;
+  }
+
+  .memberFamilyMeta {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .profileDetailItem,
+  .profileStatCard {
+    min-height: auto;
+  }
+
+  .profileContactList li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
